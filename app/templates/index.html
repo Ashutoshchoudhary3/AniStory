@@ -1,0 +1,275 @@
+
+
+
+
+
+
+
+{% extends "base.html" %}
+
+{% block title %}ChronoStories - AI-Powered News Stories{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center py-5 mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold text-primary mb-3">
+            <i class="fas fa-clock"></i> ChronoStories
+        </h1>
+        <p class="lead mb-4">
+            Experience the future of news with AI-powered autonomous story generation. 
+            Real-time news transformed into captivating anime-style visual stories.
+        </p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <p class="text-muted">
+                    Our AI brain continuously monitors global news and trending topics, 
+                    automatically creating engaging web stories with stunning visuals.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section mb-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-brain fa-2x mb-2"></i>
+                        <h3>AI Powered</h3>
+                        <p>Autonomous content generation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <i class="fas fa-globe fa-2x mb-2"></i>
+                        <h3>Global Coverage</h3>
+                        <p>Real-time news monitoring</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-image fa-2x mb-2"></i>
+                        <h3>Anime Style</h3>
+                        <p>Unique visual storytelling</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <i class="fas fa-bolt fa-2x mb-2"></i>
+                        <h3>Instant Stories</h3>
+                        <p>Lightning-fast generation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Stories Section -->
+<section class="recent-stories-section mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-newspaper"></i> Latest AI-Generated Stories
+        </h2>
+        
+        {% if stories %}
+            <div class="row">
+                {% for story in stories %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 story-card">
+                            {% if story.image_url %}
+                                <img src="{{ story.image_url }}" class="card-img-top" alt="{{ story.title }}">
+                            {% else %}
+                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <span class="badge bg-primary mb-2">{{ story.category|title }}</span>
+                                <h5 class="card-title">{{ story.title[:60] }}{% if story.title|length > 60 %}...{% endif %}</h5>
+                                <p class="card-text">{{ story.summary[:120] }}{% if story.summary|length > 120 %}...{% endif %}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ story.created_at.strftime('%b %d, %Y') }}
+                                    </small>
+                                    <a href="{{ url_for('stories.story_detail', story_id=story.id) }}" class="btn btn-sm btn-primary">
+                                        Read More <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('stories.stories_list') }}" class="btn btn-lg btn-outline-primary">
+                    View All Stories <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No stories available yet. 
+                    Our AI is working on generating the first stories!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Trending Topics Section -->
+{% if trending_topics %}
+<section class="trending-topics-section mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-fire"></i> Trending Topics
+        </h2>
+        
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="list-group">
+                    {% for topic in trending_topics %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ topic.topic }}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-chart-line"></i> {{ topic.trend_score|round(1) }}
+                                </small>
+                            </div>
+                            <p class="mb-1">
+                                <small class="text-muted">
+                                    Source: {{ topic.source|title }} | 
+                                    Volume: {{ topic.volume|default(0) }}
+                                </small>
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features Section -->
+<section class="features-section mb-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-search fa-3x text-primary"></i>
+                    </div>
+                    <h4>Content Discovery</h4>
+                    <p>Our AI continuously monitors global news sources and trending topics across multiple platforms.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-brain fa-3x text-success"></i>
+                    </div>
+                    <h4>AI Analysis</h4>
+                    <p>Advanced AI analyzes content, identifies key themes, and determines the best storytelling approach.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-magic fa-3x text-info"></i>
+                    </div>
+                    <h4>Visual Creation</h4>
+                    <p>AI generates stunning anime-style images and assembles everything into engaging web stories.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section text-center py-5 bg-primary text-white">
+    <div class="container">
+        <h2 class="mb-3">Ready to Experience the Future?</h2>
+        <p class="lead mb-4">Explore our dashboard to see the AI in action and discover amazing stories.</p>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-light btn-lg">
+            <i class="fas fa-chart-bar"></i> View Dashboard
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.story-card {
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stats-section .card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.stats-section .card:hover {
+    transform: translateY(-3px);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.cta-section {
+    border-radius: 15px;
+}
+
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-section .card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+
+
+
+

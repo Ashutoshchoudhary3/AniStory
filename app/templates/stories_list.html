@@ -1,0 +1,444 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% extends "base.html" %}
+
+{% block title %}Stories - ChronoStories{% endblock %}
+
+{% block content %}
+<div class="stories-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-book"></i> AI-Generated Stories</h1>
+            <p class="text-muted">Discover captivating stories created by our AI-powered platform</p>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex justify-content-end align-items-end h-100">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary {% if not category_filter %}active{% endif %}" 
+                            onclick="filterStories('all')">
+                        All
+                    </button>
+                    <button type="button" class="btn btn-outline-primary {% if category_filter == 'news' %}active{% endif %}" 
+                            onclick="filterStories('news')">
+                        News
+                    </button>
+                    <button type="button" class="btn btn-outline-primary {% if category_filter == 'trend' %}active{% endif %}" 
+                            onclick="filterStories('trend')">
+                        Trends
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search stories..." 
+                       value="{{ search_query or '' }}">
+                <button class="btn btn-primary" type="button" onclick="searchStories()">
+                    Search
+                </button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="sortSelect" onchange="sortStories()">
+                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+                <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+                <option value="views" {% if sort_by == 'views' %}selected{% endif %}>Most Viewed</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-success w-100" onclick="generateNewStory()">
+                <i class="fas fa-plus"></i> Generate New Story
+            </button>
+        </div>
+    </div>
+
+    <!-- Stories Grid -->
+    <div class="row" id="storiesGrid">
+        {% if stories %}
+            {% for story in stories %}
+                <div class="col-md-6 col-lg-4 mb-4 story-item" 
+                     data-category="{{ story.category }}" 
+                     data-views="{{ story.views }}"
+                     data-date="{{ story.created_at.timestamp() }}">
+                    <div class="card h-100 story-card">
+                        {% if story.image_url %}
+                            <img src="{{ story.image_url }}" class="card-img-top" alt="{{ story.title }}" 
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <span class="badge bg-{{ 'primary' if story.category == 'news' else 'success' }}">
+                                    <i class="fas fa-{{ 'newspaper' if story.category == 'news' else 'fire' }}"></i> 
+                                    {{ story.category|title }}
+                                </span>
+                                <span class="badge bg-secondary float-end">
+                                    <i class="fas fa-eye"></i> {{ story.views }}
+                                </span>
+                            </div>
+                            
+                            <h5 class="card-title">{{ story.title[:80] }}{% if story.title|length > 80 %}...{% endif %}</h5>
+                            <p class="card-text flex-grow-1">
+                                {{ story.summary[:150] }}{% if story.summary|length > 150 %}...{% endif %}
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ story.created_at.strftime('%b %d, %Y') }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-globe"></i> {{ story.source|title }}
+                                    </small>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url_for('stories.story_detail', story_id=story.id) }}" 
+                                       class="btn btn-sm btn-primary">
+                                        Read Story <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-secondary" 
+                                                onclick="shareStory('{{ story.id }}', '{{ story.title }}')">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary" 
+                                                onclick="downloadStory('{{ story.id }}')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-5x text-muted mb-4"></i>
+                    <h3 class="text-muted">No Stories Found</h3>
+                    <p class="text-muted">No stories match your current filters.</p>
+                    <button class="btn btn-primary" onclick="generateNewStory()">
+                        <i class="fas fa-plus"></i> Generate Your First Story
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+        <nav aria-label="Stories pagination" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('stories.stories_list', page=pagination.prev_num, **request.args) }}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('stories.stories_list', page=page_num, **request.args) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('stories.stories_list', page=pagination.next_num, **request.args) }}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Stories list JavaScript
+let currentFilter = '{{ category_filter or "all" }}';
+let currentSort = '{{ sort_by or "newest" }}';
+let currentSearch = '{{ search_query or "" }}';
+
+function filterStories(category) {
+    currentFilter = category;
+    updateURLAndReload();
+}
+
+function sortStories() {
+    currentSort = document.getElementById('sortSelect').value;
+    updateURLAndReload();
+}
+
+function searchStories() {
+    currentSearch = document.getElementById('searchInput').value;
+    updateURLAndReload();
+}
+
+function updateURLAndReload() {
+    const params = new URLSearchParams();
+    
+    if (currentFilter !== 'all') params.set('category', currentFilter);
+    if (currentSort !== 'newest') params.set('sort', currentSort);
+    if (currentSearch) params.set('search', currentSearch);
+    
+    const url = `${window.location.pathname}?${params.toString()}`;
+    window.location.href = url;
+}
+
+function generateNewStory() {
+    const topic = prompt('Enter a topic (optional):', '');
+    
+    fetch('/api/generate-story', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            source: 'manual',
+            topic: topic || ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Story generation started! The page will refresh when complete.');
+            setTimeout(() => location.reload(), 3000);
+        } else {
+            alert('Error generating story: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Network error: ' + error.message);
+    });
+}
+
+function shareStory(storyId, storyTitle) {
+    if (navigator.share) {
+        navigator.share({
+            title: storyTitle,
+            text: 'Check out this AI-generated story!',
+            url: `${window.location.origin}/story/${storyId}`
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        // Fallback: copy to clipboard
+        const url = `${window.location.origin}/story/${storyId}`;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Story link copied to clipboard!');
+        }).catch(() => {
+            alert(`Share this link: ${url}`);
+        });
+    }
+}
+
+function downloadStory(storyId) {
+    fetch(`/api/story/${storyId}/download`)
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `story-${storyId}.html`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            alert('Error downloading story: ' + error.message);
+        });
+}
+
+// Search on Enter key
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchStories();
+    }
+});
+
+// Auto-refresh every 30 seconds if in auto mode
+{% if auto_refresh %}
+setInterval(() => {
+    if (!document.hidden) {
+        location.reload();
+    }
+}, 30000);
+{% endif %}
+
+// Add some interactive animations
+document.addEventListener('DOMContentLoaded', function() {
+    const storyCards = document.querySelectorAll('.story-card');
+    
+    storyCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stories-container {
+    max-width: 1400px;
+}
+
+.story-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.activity-timeline {
+    position: relative;
+}
+
+.activity-item {
+    display: flex;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content h6 {
+    margin-bottom: 5px;
+}
+
+.category-stats .category-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.category-stats .category-item:last-child {
+    border-bottom: none;
+}
+
+.category-name {
+    font-weight: 500;
+}
+
+.status-messages {
+    min-height: 20px;
+}
+
+@media (max-width: 768px) {
+    .metric-card {
+        margin-bottom: 1rem;
+    }
+    
+    .activity-item {
+        flex-direction: column;
+    }
+    
+    .activity-icon {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+}
+
+/* Animation for story cards */
+.story-card {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0 !important;
+        margin-bottom: 5px;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
