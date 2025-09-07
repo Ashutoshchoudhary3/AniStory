@@ -1,0 +1,742 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% extends "base.html" %}
+
+{% block title %}{{ story.title }} - ChronoStories{% endblock %}
+
+{% block extra_css %}
+<style>
+.story-detail-container {
+    max-width: 900px;
+}
+
+.story-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.story-image-container {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.story-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.story-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+.story-content p {
+    margin-bottom: 1.5rem;
+}
+
+.story-meta {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.meta-item:last-child {
+    margin-bottom: 0;
+}
+
+.meta-item i {
+    width: 20px;
+    margin-right: 10px;
+    color: #6c757d;
+}
+
+.story-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.story-actions .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+.ai-badge {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .story-image {
+        height: 250px;
+    }
+    
+    .story-actions .btn {
+        flex: none;
+        width: 100%;
+    }
+}
+
+/* Web Story Format */
+.web-story-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+}
+
+.web-story-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.web-story-slide.active {
+    opacity: 1;
+}
+
+.web-story-slide img {
+    max-width: 90%;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.web-story-slide h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.web-story-slide p {
+    font-size: 1.2rem;
+    max-width: 80%;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.web-story-navigation {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.web-story-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.web-story-dot.active {
+    background: white;
+}
+
+.web-story-controls {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.web-story-control {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: background 0.3s ease;
+}
+
+.web-story-control:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.web-story-progress {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.web-story-progress-bar {
+    height: 100%;
+    background: white;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container story-detail-container">
+    <!-- Story Header -->
+    <div class="story-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <span class="ai-badge mb-2 d-inline-block">
+                    <i class="fas fa-robot"></i> AI Generated
+                </span>
+                <h1 class="mb-3">{{ story.title }}</h1>
+                <p class="lead mb-0">{{ story.summary }}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="story-stats">
+                    <div class="mb-2">
+                        <i class="fas fa-eye"></i> {{ story.views }} views
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-clock"></i> {{ story.created_at.strftime('%B %d, %Y') }}
+                    </div>
+                    <div>
+                        <i class="fas fa-tag"></i> {{ story.category|title }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Actions -->
+    <div class="story-actions">
+        <button class="btn btn-primary" onclick="viewWebStory()">
+            <i class="fas fa-play"></i> View Web Story
+        </button>
+        <button class="btn btn-outline-primary" onclick="shareStory()">
+            <i class="fas fa-share"></i> Share Story
+        </button>
+        <button class="btn btn-outline-secondary" onclick="downloadStory()">
+            <i class="fas fa-download"></i> Download
+        </button>
+        <button class="btn btn-outline-info" onclick="generateSimilar()">
+            <i class="fas fa-magic"></i> Generate Similar
+        </button>
+    </div>
+
+    <!-- Story Image -->
+    {% if story.image_url %}
+    <div class="story-image-container">
+        <img src="{{ story.image_url }}" alt="{{ story.title }}" class="story-image">
+        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4" 
+             style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+            <div class="text-white">
+                <h3>{{ story.title }}</h3>
+                <p class="mb-0">{{ story.summary }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Story Meta Information -->
+    <div class="story-meta">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="meta-item">
+                    <i class="fas fa-globe"></i>
+                    <span><strong>Source:</strong> {{ story.source|title }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span><strong>Generated:</strong> {{ story.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-hashtag"></i>
+                    <span><strong>Story ID:</strong> {{ story.id }}</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="meta-item">
+                    <i class="fas fa-brain"></i>
+                    <span><strong>AI Model:</strong> {{ story.ai_model or 'Gemini 2.5 Flash' }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-palette"></i>
+                    <span><strong>Image Style:</strong> Anime Forge Style</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-tags"></i>
+                    <span><strong>Keywords:</strong> {{ story.keywords or 'N/A' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Content -->
+    <div class="story-content mb-5">
+        <h3 class="mb-4">The Story</h3>
+        <div class="content-body">
+            {{ story.content|safe }}
+        </div>
+    </div>
+
+    <!-- Related Stories -->
+    {% if related_stories %}
+    <div class="related-stories mb-5">
+        <h3 class="mb-4"><i class="fas fa-book-open"></i> Related Stories</h3>
+        <div class="row">
+            {% for related_story in related_stories %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    {% if related_story.image_url %}
+                        <img src="{{ related_story.image_url }}" class="card-img-top" alt="{{ related_story.title }}" 
+                             style="height: 150px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ related_story.title[:50] }}{% if related_story.title|length > 50 %}...{% endif %}</h6>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-eye"></i> {{ related_story.views }} views
+                            </small>
+                        </p>
+                        <a href="{{ url_for('stories.story_detail', story_id=related_story.id) }}" 
+                           class="btn btn-sm btn-outline-primary">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Comments Section -->
+    <div class="comments-section mb-5">
+        <h3 class="mb-4"><i class="fas fa-comments"></i> Comments</h3>
+        
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="fas fa-user"></i> {{ comment.author or 'Anonymous' }}
+                            </h6>
+                            <small class="text-muted">
+                                {{ comment.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small>
+                        </div>
+                        <p class="card-text">{{ comment.content }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-comments fa-3x mb-3"></i>
+                <p>No comments yet. Be the first to share your thoughts!</p>
+            </div>
+        {% endif %}
+        
+        <!-- Add Comment Form -->
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Add a Comment</h6>
+                <form id="commentForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="authorName" placeholder="Your name (optional)">
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" id="commentContent" rows="3" placeholder="Share your thoughts..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Post Comment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Web Story Modal -->
+<div class="modal fade" id="webStoryModal" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ story.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="web-story-container" id="webStoryContainer">
+                    <!-- Web story slides will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Story detail JavaScript
+let currentSlide = 0;
+let slides = [];
+let autoAdvance = null;
+
+function viewWebStory() {
+    generateWebStorySlides();
+    showWebStoryModal();
+}
+
+function generateWebStorySlides() {
+    const container = document.getElementById('webStoryContainer');
+    const storyData = {
+        title: "{{ story.title }}",
+        summary: "{{ story.summary }}",
+        image_url: "{{ story.image_url }}",
+        content: "{{ story.content|escape }}",
+        category: "{{ story.category }}",
+        source: "{{ story.source }}"
+    };
+    
+    // Create slides based on story content
+    slides = [
+        {
+            type: 'title',
+            title: storyData.title,
+            subtitle: storyData.summary,
+            image: storyData.image_url
+        },
+        {
+            type: 'content',
+            title: 'The Story',
+            content: storyData.content.substring(0, 500) + '...',
+            image: storyData.image_url
+        },
+        {
+            type: 'info',
+            title: 'Story Details',
+            content: `Category: ${storyData.category}<br>Source: ${storyData.source}<br>Generated by AI`,
+            image: null
+        }
+    ];
+    
+    // Generate HTML for slides
+    container.innerHTML = slides.map((slide, index) => `
+        <div class="web-story-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
+            ${slide.image ? `<img src="${slide.image}" alt="${slide.title}">` : ''}
+            <h2>${slide.title}</h2>
+            <p>${slide.content || slide.subtitle || ''}</p>
+        </div>
+    `).join('');
+    
+    // Add navigation
+    container.innerHTML += `
+        <div class="web-story-navigation">
+            ${slides.map((_, index) => `
+                <div class="web-story-dot ${index === 0 ? 'active' : ''}" data-slide="${index}"></div>
+            `).join('')}
+        </div>
+        <div class="web-story-controls">
+            <button class="web-story-control" onclick="previousSlide()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="web-story-control" onclick="nextSlide()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="web-story-progress">
+            <div class="web-story-progress-bar" id="progressBar"></div>
+        </div>
+    `;
+    
+    // Add click handlers
+    document.querySelectorAll('.web-story-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            goToSlide(parseInt(e.target.dataset.slide));
+        });
+    });
+}
+
+function showWebStoryModal() {
+    const modal = new bootstrap.Modal(document.getElementById('webStoryModal'));
+    modal.show();
+    
+    // Start auto-advance
+    startAutoAdvance();
+    
+    // Handle modal close
+    document.getElementById('webStoryModal').addEventListener('hidden.bs.modal', () => {
+        stopAutoAdvance();
+    });
+}
+
+function startAutoAdvance() {
+    let progress = 0;
+    autoAdvance = setInterval(() => {
+        progress += 2;
+        document.getElementById('progressBar').style.width = progress + '%';
+        
+        if (progress >= 100) {
+            nextSlide();
+            progress = 0;
+        }
+    }, 100);
+}
+
+function stopAutoAdvance() {
+    if (autoAdvance) {
+        clearInterval(autoAdvance);
+        autoAdvance = null;
+    }
+}
+
+function goToSlide(slideIndex) {
+    if (slideIndex < 0 || slideIndex >= slides.length) return;
+    
+    // Hide current slide
+    document.querySelector(`[data-slide="${currentSlide}"]`).classList.remove('active');
+    document.querySelector(`.web-story-dot[data-slide="${currentSlide}"]`).classList.remove('active');
+    
+    // Show new slide
+    currentSlide = slideIndex;
+    document.querySelector(`[data-slide="${currentSlide}"]`).classList.add('active');
+    document.querySelector(`.web-story-dot[data-slide="${currentSlide}"]`).classList.add('active');
+    
+    // Reset progress
+    document.getElementById('progressBar').style.width = '0%';
+}
+
+function nextSlide() {
+    if (currentSlide < slides.length - 1) {
+        goToSlide(currentSlide + 1);
+    } else {
+        // End of story
+        bootstrap.Modal.getInstance(document.getElementById('webStoryModal')).hide();
+    }
+}
+
+function previousSlide() {
+    if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+    }
+}
+
+function shareStory() {
+    const storyUrl = window.location.href;
+    const storyTitle = "{{ story.title }}";
+    
+    if (navigator.share) {
+        navigator.share({
+            title: storyTitle,
+            text: 'Check out this AI-generated story!',
+            url: storyUrl
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        navigator.clipboard.writeText(storyUrl).then(() => {
+            alert('Story link copied to clipboard!');
+        }).catch(() => {
+            alert(`Share this link: ${storyUrl}`);
+        });
+    }
+}
+
+function downloadStory() {
+    // Create a simple HTML file with the story content
+    const storyHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{{ story.title }}</title>
+            <meta charset="utf-8">
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                img { max-width: 100%; height: auto; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .meta { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>{{ story.title }}</h1>
+                <p>{{ story.summary }}</p>
+            </div>
+            {% if story.image_url %}
+            <img src="{{ story.image_url }}" alt="{{ story.title }}">
+            {% endif %}
+            <div class="meta">
+                <p><strong>Generated:</strong> {{ story.created_at.strftime('%B %d, %Y') }}</p>
+                <p><strong>Category:</strong> {{ story.category|title }}</p>
+                <p><strong>Source:</strong> {{ story.source|title }}</p>
+            </div>
+            <div class="content">
+                {{ story.content|safe }}
+            </div>
+        </body>
+        </html>
+    `;
+    
+    const blob = new Blob([storyHtml], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `story-{{ story.id }}.html`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+
+function generateSimilar() {
+    if (confirm('Generate a similar story based on this one?')) {
+        fetch('/api/generate-similar-story', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                story_id: {{ story.id }},
+                topic: '{{ story.title }}'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Similar story generation started! Check back in a few moments.');
+            } else {
+                alert('Error generating similar story: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Network error: ' + error.message);
+        });
+    }
+}
+
+// Handle comment form submission
+document.getElementById('commentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const author = document.getElementById('authorName').value || 'Anonymous';
+    const content = document.getElementById('commentContent').value;
+    
+    fetch(`/api/story/{{ story.id }}/comment`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            author: author,
+            content: content
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Comment posted successfully!');
+            location.reload();
+        } else {
+            alert('Error posting comment: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Network error: ' + error.message);
+    });
+});
+
+// Keyboard navigation for web story
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('webStoryModal');
+    if (modal.classList.contains('show')) {
+        if (e.key === 'ArrowLeft') {
+            previousSlide();
+        } else if (e.key === 'ArrowRight' || e.key === ' ') {
+            nextSlide();
+        } else if (e.key === 'Escape') {
+            bootstrap.Modal.getInstance(modal).hide();
+        }
+    }
+});
+
+// Track story view
+fetch(`/api/story/{{ story.id }}/view`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    }
+}).catch(error => console.log('Error tracking view:', error));
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

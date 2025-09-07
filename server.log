@@ -1,0 +1,10 @@
+2025-09-07 11:08:55,054 - app - INFO - Database tables created successfully
+2025-09-07 11:08:55,055 - __main__ - INFO - Starting ChronoStories on port 5000
+ * Serving Flask app 'app'
+ * Debug mode: off
+2025-09-07 11:08:55,059 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.0.5:5000
+2025-09-07 11:08:55,059 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-09-07 11:09:32,881 - werkzeug - INFO - 127.0.0.1 - - [07/Sep/2025 11:09:32] "GET / HTTP/1.1" 200 -
