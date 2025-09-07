@@ -38,8 +38,8 @@ from config import Config
 from .story_generator import StoryGenerator
 from .image_prompt_generator import ImagePromptGenerator
 from .content_analyzer import ContentAnalyzer
-from .performance_analyzer import PerformanceAnalyzer
-from .scraping_controller import ScrapingController
+# from .performance_analyzer import PerformanceAnalyzer
+# from .scraping_controller import ScrapingController
 
 logger = logging.getLogger(__name__)
 
@@ -89,8 +89,8 @@ class AIBrain:
         self.story_generator = StoryGenerator()
         self.image_prompt_generator = ImagePromptGenerator()
         self.content_analyzer = ContentAnalyzer()
-        self.performance_analyzer = PerformanceAnalyzer()
-        self.scraping_controller = ScrapingController()
+        # self.performance_analyzer = PerformanceAnalyzer()
+        # self.scraping_controller = ScrapingController()
         
         # Processing queues
         self.pending_tasks: List[ProcessingTask] = []
@@ -133,7 +133,7 @@ class AIBrain:
         }
         
         # Database connection
-        self.db_path = Config.DATABASE_PATH
+        self.db_path = getattr(Config, 'DATABASE_PATH', Config.DATABASE_URL)
         self._init_database()
     
     async def initialize(self):
@@ -145,8 +145,8 @@ class AIBrain:
             await self.story_generator.initialize()
             await self.image_prompt_generator.initialize()
             await self.content_analyzer.initialize()
-            await self.performance_analyzer.initialize()
-            await self.scraping_controller.initialize()
+            # await self.performance_analyzer.initialize()
+            # await self.scraping_controller.initialize()
             
             # Load performance data
             await self._load_performance_data()
@@ -161,6 +161,11 @@ class AIBrain:
     def _init_database(self):
         """Initialize database tables"""
         try:
+            # Ensure directory exists
+            import os
+            db_dir = os.path.dirname(self.db_path)
+            if db_dir and not os.path.exists(db_dir):
+                os.makedirs(db_dir)
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
@@ -272,6 +277,9 @@ class AIBrain:
         # Add to pending queue
         self.pending_tasks.append(task)
         self.pending_tasks.sort(key=lambda x: x.priority, reverse=True)
+        
+        # Save task to database immediately
+        await self._update_task_status(task)
         
         logger.info(f"Created processing task {task_id} for {source.value} content")
         
@@ -520,10 +528,11 @@ class AIBrain:
             
             # Analyze and adapt
             if performance_data:
-                await self.performance_analyzer.analyze_performance(performance_data)
+                # await self.performance_analyzer.analyze_performance(performance_data)
                 
                 # Get adaptation recommendations
-                recommendations = await self.performance_analyzer.get_adaptation_recommendations()
+                # recommendations = await self.performance_analyzer.get_adaptation_recommendations()
+                recommendations = []
                 
                 # Apply recommendations
                 await self._apply_adaptations(recommendations)
@@ -611,6 +620,20 @@ class AIBrain:
     
     def get_task_status(self, task_id: str) -> Optional[Dict]:
         """Get status of a specific task"""
+        # Check pending tasks
+        for task in self.pending_tasks:
+            if task.id == task_id:
+                return {
+                    'id': task.id,
+                    'status': task.status.value,
+                    'source': task.source.value,
+                    'story_type': task.story_type,
+                    'target_audience': task.target_audience,
+                    'created_at': task.created_at.isoformat(),
+                    'retry_count': task.retry_count,
+                    'metadata': task.metadata
+                }
+        
         # Check processing tasks
         if task_id in self.processing_tasks:
             task = self.processing_tasks[task_id]
@@ -640,8 +663,88 @@ class AIBrain:
                 }
         
         return None
+    
+    def process_news_story(self, topic: str) -> Dict:
+        """Process a news story topic (synchronous wrapper for async process_content)"""
+        try:
+            # Create content data for news story
+            content_data = {
+                'title': topic,
+                'content': f"News story about {topic}",
+                'topic': topic
+            }
+            
+            # Use asyncio to run the async method
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            task_id = loop.run_until_complete(
+                self.process_content(
+                    content_data=content_data,
+                    source=ContentSource.GNEWS,
+                    priority=8,
+                    story_type='news',
+                    target_audience='general',
+                    narrative_angle='informative'
+                )
+            )
+            
+            loop.close()
+            
+            return {
+                'success': True,
+                'story_id': task_id,
+                'message': 'News story generation initiated'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error processing news story: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def process_trend_story(self, topic: str) -> Dict:
+        """Process a trending topic story (synchronous wrapper for async process_content)"""
+        try:
+            # Create content data for trend story
+            content_data = {
+                'title': topic,
+                'content': f"Trending story about {topic}",
+                'topic': topic
+            }
+            
+            # Use asyncio to run the async method
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            task_id = loop.run_until_complete(
+                self.process_content(
+                    content_data=content_data,
+                    source=ContentSource.TRENDING,
+                    priority=9,
+                    story_type='trending',
+                    target_audience='general',
+                    narrative_angle='engaging'
+                )
+            )
+            
+            loop.close()
+            
+            return {
+                'success': True,
+                'story_id': task_id,
+                'message': 'Trend story generation initiated'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error processing trend story: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
-# Example usage
+# Example usage (outside the class)
 async def example_usage():
     ai_brain = AIBrain()
     

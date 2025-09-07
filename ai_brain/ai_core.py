@@ -54,7 +54,7 @@ class AIBrain:
         self.content_analyzer = ContentAnalyzer()
         self.image_prompt_generator = ImagePromptGenerator()
         self.story_generator = StoryGenerator()
-        self.performance_analyzer = PerformanceAnalyzer()
+        # self.performance_analyzer = PerformanceAnalyzer()
         
         self.gnews_scraper = GNewsScraper()
         self.trend_scraper = TrendScraper()
@@ -92,7 +92,7 @@ class AIBrain:
             await self.content_analyzer.initialize()
             await self.image_prompt_generator.initialize()
             await self.story_generator.initialize()
-            await self.performance_analyzer.initialize()
+            # await self.performance_analyzer.initialize()
             
             # Initialize scrapers
             await self.trend_scraper.initialize()
@@ -232,7 +232,8 @@ class AIBrain:
         max_stories = self.config['max_stories_per_hour']
         
         # Get recent performance data
-        performance_data = await self.performance_analyzer.get_recent_performance()
+        # performance_data = await self.performance_analyzer.get_recent_performance()
+        performance_data = {}
         
         for content in analyzed_content[:max_stories]:
             try:
@@ -352,10 +353,12 @@ class AIBrain:
         """Analyze performance and update learning data"""
         try:
             # Get recent analytics data
-            analytics_data = await self.performance_analyzer.get_analytics_data()
+            # analytics_data = await self.performance_analyzer.get_analytics_data()
+            analytics_data = {}
             
             # Analyze what content performs best
-            performance_insights = await self.performance_analyzer.analyze_performance(analytics_data)
+            # performance_insights = await self.performance_analyzer.analyze_performance(analytics_data)
+            performance_insights = {}
             
             # Update AI configuration based on insights
             if self.config['adaptive_learning_enabled']:
