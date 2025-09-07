@@ -20,6 +20,9 @@ class Config:
     # Flask
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
     ENV = os.getenv('FLASK_ENV', 'development')
+    SERVER_NAME = os.getenv('SERVER_NAME', 'localhost:40268')
+    APPLICATION_ROOT = os.getenv('APPLICATION_ROOT', '/')
+    PREFERRED_URL_SCHEME = os.getenv('PREFERRED_URL_SCHEME', 'http')
     
     # Image Generation
     GEMINI_IMAGE_MODEL = os.getenv('GEMINI_IMAGE_MODEL', 'gemini-2.5-flash-image-preview')

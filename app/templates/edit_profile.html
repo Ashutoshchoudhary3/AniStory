@@ -1,0 +1,438 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - ChronoStories</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        .edit-profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        
+        .profile-header {
+            background: var(--anime-gradient);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-section h4 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-floating label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .btn-save {
+            background: var(--anime-gradient);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: transparent;
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-cancel:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .theme-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-option:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .theme-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .theme-option i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .theme-option.light i {
+            color: #f8f9fa;
+        }
+        
+        .theme-option.dark i {
+            color: #1a1a1a;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-clock"></i> ChronoStories
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('stories.stories_list') }}">
+                            <i class="fas fa-book"></i> Stories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                            <i class="fas fa-chart-bar"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="generateStory()">
+                            <i class="fas fa-magic"></i> Generate Story
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="themeToggle" title="Toggle dark/light mode">
+                            <i class="fas fa-moon"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>{{ session.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container edit-profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <h2><i class="fas fa-user-edit me-2"></i>Edit Profile</h2>
+            <p>Update your profile information and preferences</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h4><i class="fas fa-user me-2"></i>Basic Information</h4>
+            <form method="POST" action="{{ url_for('auth.edit_profile') }}">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="full_name" name="full_name" 
+                                   placeholder="Full Name" value="{{ user.full_name or '' }}">
+                            <label for="full_name">Full Name</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="Username" value="{{ user.username }}" readonly>
+                            <label for="username">Username (cannot be changed)</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="Email" value="{{ user.email }}" readonly>
+                            <label for="email">Email (cannot be changed)</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="bio" name="bio" 
+                                   placeholder="Bio" value="{{ user.bio or '' }}">
+                            <label for="bio">Bio</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Theme Preferences -->
+        <div class="form-section">
+            <h4><i class="fas fa-palette me-2"></i>Theme Preferences</h4>
+            <form method="POST" action="{{ url_for('auth.edit_profile') }}">
+                <div class="form-floating">
+                    <select class="form-select" id="theme_preference" name="theme_preference">
+                        <option value="light" {% if user.theme_preference == 'light' %}selected{% endif %}>Light Mode</option>
+                        <option value="dark" {% if user.theme_preference == 'dark' %}selected{% endif %}>Dark Mode</option>
+                    </select>
+                    <label for="theme_preference">Preferred Theme</label>
+                </div>
+                
+                <div class="theme-selector mt-3">
+                    <div class="theme-option light {% if user.theme_preference == 'light' %}selected{% endif %}" 
+                         onclick="selectTheme('light')">
+                        <i class="fas fa-sun"></i>
+                        <div>Light Theme</div>
+                    </div>
+                    <div class="theme-option dark {% if user.theme_preference == 'dark' %}selected{% endif %}" 
+                         onclick="selectTheme('dark')">
+                        <i class="fas fa-moon"></i>
+                        <div>Dark Theme</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Language Preferences -->
+        <div class="form-section">
+            <h4><i class="fas fa-language me-2"></i>Language Preferences</h4>
+            <form method="POST" action="{{ url_for('auth.edit_profile') }}">
+                <div class="form-floating">
+                    <select class="form-select" id="language_preference" name="language_preference">
+                        <option value="en" {% if user.language_preference == 'en' %}selected{% endif %}>English</option>
+                        <option value="es" {% if user.language_preference == 'es' %}selected{% endif %}>Spanish</option>
+                        <option value="fr" {% if user.language_preference == 'fr' %}selected{% endif %}>French</option>
+                        <option value="de" {% if user.language_preference == 'de' %}selected{% endif %}>German</option>
+                        <option value="zh" {% if user.language_preference == 'zh' %}selected{% endif %}>Chinese</option>
+                        <option value="ja" {% if user.language_preference == 'ja' %}selected{% endif %}>Japanese</option>
+                    </select>
+                    <label for="language_preference">Preferred Language</label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="form-section">
+            <h4><i class="fas fa-cog me-2"></i>Account Actions</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger w-100">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" form="profileForm" class="btn btn-save">
+                <i class="fas fa-save me-2"></i>Save Changes
+            </button>
+            <a href="{{ url_for('auth.profile') }}" class="btn btn-cancel">
+                <i class="fas fa-times me-2"></i>Cancel
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-clock"></i> ChronoStories</h5>
+                    <p>AI-powered autonomous news story generation platform.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2024 ChronoStories. All rights reserved.</p>
+                    <p>Powered by <i class="fas fa-brain"></i> AI Technology</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+        function selectTheme(theme) {
+            // Update the select dropdown
+            document.getElementById('theme_preference').value = theme;
+            
+            // Update the visual selection
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelector(`.theme-option.${theme}`).classList.add('selected');
+            
+            // Apply theme preview
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        
+        // Initialize theme selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentTheme = document.getElementById('theme_preference').value;
+            selectTheme(currentTheme);
+        });
+        
+        function generateStory() {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            button.disabled = true;
+            
+            // Make API call
+            fetch('/api/generate-story', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    source: 'news',
+                    topic: ''
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Story generation started! Check the dashboard for progress.');
+                } else {
+                    alert('Error generating story: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating story. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
+
+
