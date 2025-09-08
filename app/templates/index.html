@@ -13,21 +13,71 @@
 <!-- Hero Section -->
 <section class="hero-section text-center py-5 mb-5">
     <div class="container">
-        <h1 class="display-4 fw-bold text-primary mb-3">
-            <i class="fas fa-clock"></i> ChronoStories
-        </h1>
-        <p class="lead mb-4">
-            Experience the future of news with AI-powered autonomous story generation. 
-            Real-time news transformed into captivating anime-style visual stories.
-        </p>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <p class="text-muted">
-                    Our AI brain continuously monitors global news and trending topics, 
-                    automatically creating engaging web stories with stunning visuals.
-                </p>
+        <div class="hero-animation mb-4">
+            <div class="floating-icons">
+                <i class="fas fa-brain floating-brain"></i>
+                <i class="fas fa-globe floating-globe"></i>
+                <i class="fas fa-image floating-image"></i>
+                <i class="fas fa-newspaper floating-news"></i>
             </div>
         </div>
+        <h1 class="display-3 fw-bold mb-3 hero-title">
+            <span class="chrono-text">Chrono</span><span class="stories-text">Stories</span>
+        </h1>
+        <div class="hero-subtitle mb-4">
+            <span class="badge bg-light text-dark me-2">AI-Powered</span>
+            <span class="badge bg-light text-dark me-2">Autonomous</span>
+            <span class="badge bg-light text-dark">Anime-Style</span>
+        </div>
+        {% if is_logged_in %}
+            <p class="lead mb-4">
+                Welcome back, <strong>{{ current_user.username }}</strong>! 
+                Your personal AI storyteller has been crafting personalized narratives just for you.
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <p class="text-light">
+                        <i class="fas fa-magic"></i> Discover stories tailored to your interests, 
+                        powered by our advanced AI Brain that learns from your reading preferences.
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <p class="lead mb-4">
+                The Autonomous AI News Story Engine that transforms real-time global events 
+                into captivating <strong>anime-style web stories</strong>
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <p class="text-light">
+                        <i class="fas fa-brain"></i> Our AI Brain continuously monitors news and trends, 
+                        intelligently directing content creation with stunning visual storytelling.
+                    </p>
+                </div>
+            </div>
+            <div class="hero-stats mt-4">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="stat-item">
+                            <h4 class="text-warning">{{ total_stories }}</h4>
+                            <small>Stories Generated</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-item">
+                            <h4 class="text-info">{{ stories_today }}</h4>
+                            <small>Created Today</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-item">
+                            <h4 class="text-success">{{ total_views }}</h4>
+                            <small>Total Views</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </section>
 
@@ -35,56 +85,146 @@
 <section class="stats-section mb-5">
     <div class="container">
         <div class="row text-center">
-            <div class="col-md-3 mb-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <i class="fas fa-brain fa-2x mb-2"></i>
-                        <h3>AI Powered</h3>
-                        <p>Autonomous content generation</p>
+            {% if is_logged_in %}
+                <!-- Personalized Stats for Logged-in Users -->
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-book-open fa-2x mb-2"></i>
+                            <h3>{{ total_stories }}</h3>
+                            <p>Stories Available</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <i class="fas fa-globe fa-2x mb-2"></i>
-                        <h3>Global Coverage</h3>
-                        <p>Real-time news monitoring</p>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <i class="fas fa-eye fa-2x mb-2"></i>
+                            <h3>{{ total_views }}</h3>
+                            <p>Total Views</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <i class="fas fa-image fa-2x mb-2"></i>
-                        <h3>Anime Style</h3>
-                        <p>Unique visual storytelling</p>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-day fa-2x mb-2"></i>
+                            <h3>{{ stories_today }}</h3>
+                            <p>New Today</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <i class="fas fa-bolt fa-2x mb-2"></i>
-                        <h3>Instant Stories</h3>
-                        <p>Lightning-fast generation</p>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user fa-2x mb-2"></i>
+                            <h3>{{ current_user.username }}</h3>
+                            <p>Your Account</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {% else %}
+                <!-- Generic Stats for Anonymous Users -->
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-brain fa-2x mb-2"></i>
+                            <h3>AI Powered</h3>
+                            <p>Autonomous content generation</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <i class="fas fa-globe fa-2x mb-2"></i>
+                            <h3>Global Coverage</h3>
+                            <p>Real-time news monitoring</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-image fa-2x mb-2"></i>
+                            <h3>Anime Style</h3>
+                            <p>Unique visual storytelling</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <i class="fas fa-bolt fa-2x mb-2"></i>
+                            <h3>Instant Stories</h3>
+                            <p>Lightning-fast generation</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </section>
+
+{% if is_logged_in %}
+<!-- Personalized For You Section -->
+<section class="personalized-section mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-user"></i> For You
+        </h2>
+        <p class="text-center text-muted mb-4">Stories curated based on your interests and reading history</p>
+        
+        {% if personalized_stories %}
+            <div class="row">
+                {% for story in personalized_stories %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 story-card">
+                            {% if story.image_url %}
+                                <img src="{{ story.image_url }}" class="card-img-top" alt="{{ story.title }}">
+                            {% else %}
+                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <span class="badge bg-primary mb-2">{{ story.category|title }}</span>
+                                <h5 class="card-title">{{ story.title[:60] }}{% if story.title|length > 60 %}...{% endif %}</h5>
+                                <p class="card-text">{{ story.summary[:120] }}{% if story.summary|length > 120 %}...{% endif %}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ story.created_at.strftime('%b %d, %Y') }}
+                                    </small>
+                                    <a href="{{ url_for('stories.story_detail', story_id=story.id) }}" class="btn btn-sm btn-primary">
+                                        Read More <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Start reading stories to get personalized recommendations!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
 
 <!-- Recent Stories Section -->
 <section class="recent-stories-section mb-5">
     <div class="container">
         <h2 class="text-center mb-4">
-            <i class="fas fa-newspaper"></i> Latest AI-Generated Stories
+            <i class="fas fa-newspaper"></i> {% if is_logged_in %}Latest Stories{% else %}Latest AI-Generated Stories{% endif %}
         </h2>
         
-        {% if stories %}
+        {% if recent_stories %}
             <div class="row">
-                {% for story in stories %}
+                {% for story in recent_stories %}
                     <div class="col-md-4 mb-4">
                         <div class="card h-100 story-card">
                             {% if story.image_url %}
@@ -162,10 +302,311 @@
 </section>
 {% endif %}
 
+<!-- AI Brain Section -->
+<section class="ai-brain-section mb-5 py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">
+                <i class="fas fa-brain text-primary"></i> The AI Brain
+            </h2>
+            <p class="lead text-muted">Our Central Intelligence Core - More Than Just a Tool, It's the Director</p>
+        </div>
+        
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4">
+                <div class="brain-visualization">
+                    <div class="brain-core">
+                        <i class="fas fa-brain fa-5x text-primary mb-3"></i>
+                        <h4>AI Brain</h4>
+                        <p class="text-muted">Central Intelligence Hub</p>
+                    </div>
+                    <div class="brain-connections">
+                        <div class="connection connection-1">
+                            <i class="fas fa-search"></i>
+                            <span>Content Discovery</span>
+                        </div>
+                        <div class="connection connection-2">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Performance Analysis</span>
+                        </div>
+                        <div class="connection connection-3">
+                            <i class="fas fa-image"></i>
+                            <span>Visual Pipeline</span>
+                        </div>
+                        <div class="connection connection-4">
+                            <i class="fas fa-cogs"></i>
+                            <span>Adaptive Control</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="brain-capabilities">
+                    <div class="capability-item mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="capability-icon me-3">
+                                <i class="fas fa-sync-alt fa-2x text-warning"></i>
+                            </div>
+                            <div>
+                                <h5>Adaptive Scraping Controller</h5>
+                                <p class="text-muted">When blocked by CAPTCHAs or layout changes, the AI analyzes and modifies Playwright scripts in real-time to overcome obstacles.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="capability-item mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="capability-icon me-3">
+                                <i class="fas fa-expand-arrows-alt fa-2x text-info"></i>
+                            </div>
+                            <div>
+                                <h5>Topic Analyst & Expansionist</h5>
+                                <p class="text-muted">Identifies trends and performs deep web searches to understand context, key players, and sentiment, creating multi-part story series.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="capability-item mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="capability-icon me-3">
+                                <i class="fas fa-chart-bar fa-2x text-success"></i>
+                            </div>
+                            <div>
+                                <h5>Performance & Traffic Analyst</h5>
+                                <p class="text-muted">Learns from website analytics which story types and visual styles get most engagement, prioritizing popular content.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Dual Content Ingestion Section -->
+<section class="content-ingestion-section mb-5 py-5 bg-light rounded">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">
+                <i class="fas fa-stream text-success"></i> Dual-Pronged Content Ingestion
+            </h2>
+            <p class="lead text-muted">Two Powerful Streams Working in Perfect Harmony</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="ingestion-card h-100">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">
+                                <i class="fas fa-bolt"></i> Reactive Stream (News-Driven)
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="ingestion-icon mb-3">
+                                <i class="fas fa-rss fa-3x text-primary"></i>
+                            </div>
+                            <h5>Real-Time News Monitoring</h5>
+                            <p class="text-muted mb-3">The system constantly listens to the GNews API. As soon as significant news articles are published, it triggers the story generation workflow.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Global news source monitoring</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Instant story triggering</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Breaking news coverage</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Steady content stream</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="ingestion-card h-100">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">
+                                <i class="fas fa-chart-line"></i> Proactive Stream (Trend-Driven)
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="ingestion-icon mb-3">
+                                <i class="fas fa-trending-up fa-3x text-success"></i>
+                            </div>
+                            <h5>Intelligent Trend Detection</h5>
+                            <p class="text-muted mb-3">Playwright scraper runs on schedule, targeting Google Trends, Twitter/X, Reddit, and major news aggregators to identify breakout topics.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Top 10 economies coverage</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Social media monitoring</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Pre-news trend detection</li>
+                                <li><i class="fas fa-check text-success me-2"></i>High public interest topics</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-lightbulb"></i> AI-Guided Intelligence</h5>
+                <p class="mb-0">Both streams are intelligently managed by our AI Brain, which decides when to activate each stream based on content quality, relevance, and user engagement patterns.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Advanced Image Generation Section -->
+<section class="image-generation-section mb-5 py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">
+                <i class="fas fa-palette text-warning"></i> Advanced Image Generation
+            </h2>
+            <p class="lead text-muted">Powered by gemini-2.5-flash-image-preview</p>
+        </div>
+        
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-4">
+                <div class="generation-showcase">
+                    <div class="showcase-header mb-4">
+                        <h4>Our Signature "Anime Forge Style"</h4>
+                        <p class="text-muted">Consistently producing high-quality, emotionally resonant images that match story tone</p>
+                    </div>
+                    <div class="generation-process">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h6>News Analysis</h6>
+                                <p class="small text-muted">AI analyzes story content and sentiment</p>
+                            </div>
+                        </div>
+                        <div class="process-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h6>Prompt Engineering</h6>
+                                <p class="small text-muted">Crafts detailed anime-style prompts</p>
+                            </div>
+                        </div>
+                        <div class="process-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h6>Visual Storytelling</h6>
+                                <p class="small text-muted">Generates 3-5 progressive story images</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="style-examples">
+                    <h5 class="mb-3">Style Adaptations</h5>
+                    <div class="style-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="style-preview me-3">
+                                <i class="fas fa-landmark fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Political News</h6>
+                                <small class="text-muted">Serious, professional anime style</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="style-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="style-preview me-3">
+                                <i class="fas fa-running fa-2x text-success"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Sports</h6>
+                                <small class="text-muted">Dynamic, energetic anime style</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="style-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="style-preview me-3">
+                                <i class="fas fa-microscope fa-2x text-info"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Science</h6>
+                                <small class="text-muted">Futuristic, discovery-focused style</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Web Stories Format Section -->
+<section class="web-stories-section mb-5 py-5 bg-gradient rounded">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3 text-white">
+                <i class="fas fa-mobile-alt"></i> Web Stories Format
+            </h2>
+            <p class="lead text-white-50">Mobile-First, Full-Screen, Tappable Stories</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="stories-demo">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="story-slide active">
+                                <div class="slide-content">
+                                    <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Story" class="slide-image">
+                                    <div class="slide-overlay">
+                                        <div class="slide-text">
+                                            <h5>Ocean Cleanup Success</h5>
+                                            <p>Major milestone achieved in Pacific cleanup</p>
+                                        </div>
+                                        <div class="slide-progress">
+                                            <div class="progress-bar"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stories-features">
+                        <h4 class="text-white mb-4">Story Features</h4>
+                        <div class="feature-list">
+                            <div class="feature-item text-white-50 mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Full-screen immersive experience
+                            </div>
+                            <div class="feature-item text-white-50 mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Tappable navigation between slides
+                            </div>
+                            <div class="feature-item text-white-50 mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Progressive image sequences (3-5 slides)
+                            </div>
+                            <div class="feature-item text-white-50 mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                High completion rates
+                            </div>
+                            <div class="feature-item text-white-50 mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Mobile-optimized design
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Features Section -->
 <section class="features-section mb-5">
     <div class="container">
-        <h2 class="text-center mb-5">How It Works</h2>
+        <h2 class="text-center mb-5">Complete Workflow</h2>
         
         <div class="row">
             <div class="col-md-4 mb-4">
@@ -213,12 +654,353 @@
 
 {% block extra_css %}
 <style>
+/* Hero Section Styles */
 .hero-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 15px;
+    position: relative;
+    overflow: hidden;
 }
 
+.hero-title {
+    background: linear-gradient(45deg, #fff, #f0f0f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.chrono-text {
+    font-weight: 300;
+}
+
+.stories-text {
+    font-weight: 700;
+    color: #ffd700;
+}
+
+.hero-animation {
+    position: relative;
+    height: 80px;
+}
+
+.floating-icons {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.floating-icons i {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.7;
+    animation: float 3s ease-in-out infinite;
+}
+
+.floating-brain {
+    top: 10px;
+    left: 20%;
+    color: #ffd700;
+    animation-delay: 0s;
+}
+
+.floating-globe {
+    top: 20px;
+    right: 20%;
+    color: #87ceeb;
+    animation-delay: 1s;
+}
+
+.floating-image {
+    bottom: 10px;
+    left: 40%;
+    color: #ff6b6b;
+    animation-delay: 2s;
+}
+
+.floating-news {
+    bottom: 20px;
+    right: 40%;
+    color: #4ecdc4;
+    animation-delay: 1.5s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.hero-stats {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.stat-item h4 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+/* AI Brain Section Styles */
+.ai-brain-section {
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+.brain-visualization {
+    position: relative;
+    text-align: center;
+    padding: 2rem;
+}
+
+.brain-core {
+    background: white;
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 2;
+}
+
+.brain-connections {
+    position: relative;
+    height: 300px;
+}
+
+.connection {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.connection i {
+    margin-right: 8px;
+    color: #667eea;
+}
+
+.connection-1 {
+    top: 20px;
+    left: 10%;
+    animation: pulse 2s infinite;
+}
+
+.connection-2 {
+    top: 80px;
+    right: 10%;
+    animation: pulse 2s infinite 0.5s;
+}
+
+.connection-3 {
+    bottom: 80px;
+    left: 15%;
+    animation: pulse 2s infinite 1s;
+}
+
+.connection-4 {
+    bottom: 20px;
+    right: 15%;
+    animation: pulse 2s infinite 1.5s;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.capability-icon {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Content Ingestion Section Styles */
+.content-ingestion-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.ingestion-card .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.ingestion-card .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.ingestion-icon {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* Image Generation Section Styles */
+.image-generation-section {
+    background: #fff;
+}
+
+.generation-process {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.process-step {
+    text-align: center;
+    flex: 1;
+}
+
+.step-number {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.process-arrow {
+    color: #667eea;
+    font-size: 1.5rem;
+    margin: 0 1rem;
+}
+
+.style-preview {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Web Stories Section Styles */
+.web-stories-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stories-demo {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.phone-mockup {
+    background: #000;
+    border-radius: 30px;
+    padding: 20px;
+    width: 250px;
+    height: 450px;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.phone-screen {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.story-slide {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.slide-image {
+    width: 100%;
+    height: 70%;
+    object-fit: cover;
+}
+
+.slide-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 20px;
+}
+
+.slide-text h5 {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.slide-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.slide-progress {
+    height: 3px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: white;
+    width: 60%;
+    animation: progress 5s linear infinite;
+}
+
+@keyframes progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.stories-features {
+    flex: 1;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* Existing Styles */
 .story-card {
     transition: transform 0.3s ease;
     border: none;
@@ -255,7 +1037,36 @@
     border-radius: 15px;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .generation-process {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .process-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .stories-demo {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .brain-connections {
+        height: 200px;
+    }
+    
+    .connection {
+        position: static;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+    
     .hero-section h1 {
         font-size: 2rem;
     }

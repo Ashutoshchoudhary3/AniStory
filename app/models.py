@@ -315,6 +315,8 @@ class User(db.Model):
     
     # Relationships
     stories = db.relationship('Story', backref='author', lazy=True)
+    preferences = db.relationship('UserPreference', backref='user', lazy=True, uselist=False)
+    uploaded_stories = db.relationship('UserStory', backref='user', lazy=True)
     
     def set_password(self, password):
         """Set password hash"""
@@ -342,6 +344,112 @@ class User(db.Model):
             'language_preference': self.language_preference,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'last_login': self.last_login.isoformat() if self.last_login else None
+        }
+
+class UserPreference(db.Model):
+    """User preferences model"""
+    __tablename__ = 'user_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Content preferences
+    preferred_categories = db.Column(db.Text)  # JSON array of preferred categories
+    blocked_categories = db.Column(db.Text)  # JSON array of blocked categories
+    preferred_sources = db.Column(db.Text)  # JSON array of preferred news sources
+    
+    # Story preferences
+    story_length_preference = db.Column(db.String(20), default='medium')  # short, medium, long
+    image_style_preference = db.Column(db.String(100), default='anime forge style')
+    content_language = db.Column(db.String(10), default='en')
+    
+    # Notification preferences
+    email_notifications = db.Column(db.Boolean, default=True)
+    browser_notifications = db.Column(db.Boolean, default=False)
+    newsletter_subscription = db.Column(db.Boolean, default=True)
+    
+    # Privacy preferences
+    profile_visibility = db.Column(db.String(20), default='public')  # public, private, friends
+    show_activity_status = db.Column(db.Boolean, default=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<UserPreference user_id={self.user_id}>'
+    
+    def to_dict(self):
+        """Convert to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'preferred_categories': json.loads(self.preferred_categories) if self.preferred_categories else [],
+            'blocked_categories': json.loads(self.blocked_categories) if self.blocked_categories else [],
+            'preferred_sources': json.loads(self.preferred_sources) if self.preferred_sources else [],
+            'story_length_preference': self.story_length_preference,
+            'image_style_preference': self.image_style_preference,
+            'content_language': self.content_language,
+            'email_notifications': self.email_notifications,
+            'browser_notifications': self.browser_notifications,
+            'newsletter_subscription': self.newsletter_subscription,
+            'profile_visibility': self.profile_visibility,
+            'show_activity_status': self.show_activity_status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+class UserStory(db.Model):
+    """User-generated stories"""
+    __tablename__ = 'user_stories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(500), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    summary = db.Column(db.Text)
+    category = db.Column(db.String(100))
+    tags = db.Column(db.Text)  # JSON array
+    image_url = db.Column(db.String(500))
+    image_prompt = db.Column(db.Text)
+    source_type = db.Column(db.String(50), default='user')  # user, ai_generated
+    status = db.Column(db.String(50), default='draft')  # draft, published, rejected
+    views = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
+    shares = db.Column(db.Integer, default=0)
+    
+    # AI processing metadata
+    ai_model_used = db.Column(db.String(100))
+    processing_metadata = db.Column(db.Text)  # JSON for storing AI processing details
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    published_at = db.Column(db.DateTime)
+    
+    def __repr__(self):
+        return f'<UserStory {self.title[:50]}>'
+    
+    def to_dict(self):
+        """Convert to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'content': self.content,
+            'summary': self.summary,
+            'category': self.category,
+            'tags': json.loads(self.tags) if self.tags else [],
+            'image_url': self.image_url,
+            'image_prompt': self.image_prompt,
+            'source_type': self.source_type,
+            'status': self.status,
+            'views': self.views,
+            'likes': self.likes,
+            'shares': self.shares,
+            'ai_model_used': self.ai_model_used,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'published_at': self.published_at.isoformat() if self.published_at else None
         }
 
 class ScrapingLog(db.Model):

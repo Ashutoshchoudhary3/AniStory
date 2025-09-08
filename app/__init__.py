@@ -39,6 +39,43 @@ def create_app():
     app.register_blueprint(stories_bp, url_prefix='/stories')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     
+    # Register custom Jinja filters
+    from datetime import datetime, timedelta
+    import math
+    
+    @app.template_filter('timesince')
+    def timesince_filter(dt, default="just now"):
+        """Convert datetime to human readable time since format"""
+        if not dt:
+            return default
+            
+        now = datetime.utcnow()
+        diff = now - dt
+        
+        # Convert to seconds
+        seconds = int(diff.total_seconds())
+        
+        if seconds < 60:
+            return "just now"
+        elif seconds < 3600:
+            minutes = math.floor(seconds / 60)
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        elif seconds < 86400:
+            hours = math.floor(seconds / 3600)
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        elif seconds < 604800:
+            days = math.floor(seconds / 86400)
+            return f"{days} day{'s' if days != 1 else ''} ago"
+        elif seconds < 2592000:
+            weeks = math.floor(seconds / 604800)
+            return f"{weeks} week{'s' if weeks != 1 else ''} ago"
+        elif seconds < 31536000:
+            months = math.floor(seconds / 2592000)
+            return f"{months} month{'s' if months != 1 else ''} ago"
+        else:
+            years = math.floor(seconds / 31536000)
+            return f"{years} year{'s' if years != 1 else ''} ago"
+    
     # Create database tables
     with app.app_context():
         db.create_all()

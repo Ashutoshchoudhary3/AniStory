@@ -270,6 +270,13 @@ body {
     font-weight: 500;
 }
 
+/* Stories Container */
+.stories-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 /* Story Cards */
 .story-card {
     border: none;
@@ -319,12 +326,25 @@ body {
     margin-bottom: 2rem;
 }
 
+.dashboard-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .dashboard-header {
     background: var(--anime-gradient);
     color: white;
     border-radius: 15px;
     padding: 2rem;
     margin-bottom: 2rem;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
 }
 
 .metric-card {
@@ -362,6 +382,14 @@ body {
 .metric-label {
     color: #6c757d;
     font-size: 0.9rem;
+}
+
+/* Stories Grid */
+.stories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
 }
 
 /* Activity Timeline */
@@ -466,6 +494,21 @@ body {
         padding: 2rem 1rem;
     }
     
+    .stories-container,
+    .dashboard-container {
+        padding: 1rem;
+    }
+    
+    .stories-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
     .stats-card {
         margin-bottom: 1rem;
     }
@@ -485,6 +528,23 @@ body {
     .activity-icon {
         margin-bottom: 1rem;
         margin-right: 0;
+    }
+    
+    /* Fix button alignment in stories page */
+    .stories-container .row.mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .stories-container .col-md-4 {
+        margin-top: 1rem;
+    }
+    
+    .stories-container .btn-group {
+        width: 100%;
+    }
+    
+    .stories-container .btn-group .btn {
+        flex: 1;
     }
     
     .activity-item::before {
@@ -818,6 +878,150 @@ body {
 
 .dark-mode .loading-content {
     color: var(--text-color);
+}
+
+/* Personalized Stories Section */
+.personalized-section {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.personalized-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    animation: pulse 3s infinite;
+}
+
+.personalized-header {
+    position: relative;
+    z-index: 2;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.personalized-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.personalized-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.personalized-stories-grid {
+    position: relative;
+    z-index: 2;
+}
+
+.personalized-story-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.personalized-story-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+.personalized-story-card .card-img-top {
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.personalized-story-card:hover .card-img-top {
+    transform: scale(1.1);
+}
+
+.personalized-story-card .card-body {
+    padding: 1.5rem;
+}
+
+.personalized-story-card .card-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.personalized-story-card .card-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.personalized-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.personalized-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.personalized-date {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.personalized-views {
+    color: #667eea;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Dark Mode for Personalized Section */
+.dark-mode .personalized-section {
+    background: linear-gradient(135deg, #8e44ad 0%, #e74c3c 100%);
+}
+
+.dark-mode .personalized-story-card {
+    background: rgba(45, 45, 45, 0.95);
+    color: #e9ecef;
+}
+
+.dark-mode .personalized-story-card .card-title {
+    color: #e9ecef;
+}
+
+.dark-mode .personalized-story-card .card-text {
+    color: #bdc3c7;
+}
+
+.dark-mode .personalized-meta {
+    border-top-color: #495057;
+}
+
+.dark-mode .personalized-date {
+    color: #bdc3c7;
 }
 
 /* Custom Scrollbar */

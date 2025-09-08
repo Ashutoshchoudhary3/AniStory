@@ -1,0 +1,655 @@
+
+{% extends "base_youtube.html" %}
+
+{% block title %}ChronoStories - AI-Powered News Stories{% endblock %}
+
+{% block content %}
+<div class="homepage-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome to ChronoStories</h1>
+            <p class="hero-subtitle">AI-powered news stories that bring trending topics to life</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary btn-lg" onclick="generateStory()">
+                    <i class="fas fa-magic"></i> Generate Your First Story
+                </button>
+                <a href="{{ url_for('stories.stories_list') }}" class="btn btn-outline-primary btn-lg">
+                    Browse Stories
+                </a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="{{ url_for('static', filename='img/hero-illustration.png') }}" alt="AI Story Generation">
+        </div>
+    </section>
+
+    <!-- Featured Stories Section -->
+    <section class="featured-section">
+        <div class="section-header">
+            <h2 class="section-title">Featured Stories</h2>
+            <a href="{{ url_for('stories.stories_list') }}" class="section-see-all">See all</a>
+        </div>
+        
+        {% if featured_stories %}
+        <div class="stories-grid">
+            {% for story in featured_stories %}
+            <div class="story-card" data-story-id="{{ story.id }}">
+                <img src="{{ story.image_url or url_for('static', filename='img/placeholder.jpg') }}" 
+                     alt="{{ story.title }}" 
+                     class="story-card-image"
+                     loading="lazy">
+                <div class="story-card-content">
+                    <h3 class="story-card-title">{{ story.title }}</h3>
+                    <p class="story-card-description">{{ story.summary or story.content[:150] }}...</p>
+                    <div class="story-card-meta">
+                        <span class="story-card-category">
+                            <i class="fas fa-tag"></i> {{ story.category or 'General' }}
+                        </span>
+                        <span class="story-card-views">
+                            <i class="fas fa-eye"></i> {{ story.views or 0 }}
+                        </span>
+                        <span class="story-card-date">
+                            <i class="fas fa-clock"></i> {{ story.created_at|timesince }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-book-open"></i>
+            <h3>No featured stories yet</h3>
+            <p>Check back soon for amazing AI-generated stories!</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Trending Topics Section -->
+    <section class="trending-section">
+        <div class="section-header">
+            <h2 class="section-title">Trending Topics</h2>
+            <a href="{{ url_for('main.trending') }}" class="section-see-all">Explore trends</a>
+        </div>
+        
+        {% if trending_topics %}
+        <div class="trending-grid">
+            {% for topic in trending_topics[:6] %}
+            <div class="trending-card">
+                <div class="trending-rank">#{{ loop.index }}</div>
+                <div class="trending-content">
+                    <h4 class="trending-title">{{ topic.topic }}</h4>
+                    <p class="trending-count">{{ topic.mentions }} mentions</p>
+                    <div class="trending-change {% if topic.trend == 'up' %}positive{% elif topic.trend == 'down' %}negative{% endif %}">
+                        <i class="fas fa-arrow-{{ topic.trend }}"></i>
+                        {{ topic.change_percent }}%
+                    </div>
+                </div>
+                <a href="{{ url_for('stories.search', q=topic.topic) }}" class="trending-link">
+                    View Stories
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h3>No trending topics available</h3>
+            <p>Our AI is analyzing current trends. Check back soon!</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Recent Stories Section -->
+    <section class="recent-section">
+        <div class="section-header">
+            <h2 class="section-title">Recent Stories</h2>
+            <a href="{{ url_for('stories.stories_list') }}" class="section-see-all">See all</a>
+        </div>
+        
+        {% if recent_stories %}
+        <div class="stories-grid">
+            {% for story in recent_stories %}
+            <div class="story-card" data-story-id="{{ story.id }}">
+                <img src="{{ story.image_url or url_for('static', filename='img/placeholder.jpg') }}" 
+                     alt="{{ story.title }}" 
+                     class="story-card-image"
+                     loading="lazy">
+                <div class="story-card-content">
+                    <h3 class="story-card-title">{{ story.title }}</h3>
+                    <p class="story-card-description">{{ story.summary or story.content[:150] }}...</p>
+                    <div class="story-card-meta">
+                        <span class="story-card-category">
+                            <i class="fas fa-tag"></i> {{ story.category or 'General' }}
+                        </span>
+                        <span class="story-card-views">
+                            <i class="fas fa-eye"></i> {{ story.views or 0 }}
+                        </span>
+                        <span class="story-card-date">
+                            <i class="fas fa-clock"></i> {{ story.created_at|timesince }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clock"></i>
+            <h3>No recent stories</h3>
+            <p>Be the first to generate a story!</p>
+            <button class="btn btn-primary" onclick="generateStory()">
+                Generate Story
+            </button>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ total_stories or 0 }}</h3>
+                    <p class="stat-label">Stories Generated</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ total_views or 0 }}</h3>
+                    <p class="stat-label">Active Users</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ total_views or 0 }}</h3>
+                    <p class="stat-label">Total Views</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ stories_today or 0 }}</h3>
+                    <p class="stat-label">AI Models</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Create Your Own Stories?</h2>
+            <p class="cta-description">Join thousands of users creating amazing AI-powered stories</p>
+            <div class="cta-buttons">
+                {% if session.user_id %}
+                <button class="btn btn-primary btn-lg" onclick="generateStory()">
+                    <i class="fas fa-magic"></i> Generate Story
+                </button>
+                {% else %}
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg">
+                    Get Started Free
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                    Login
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+/* Homepage-specific styles */
+.homepage-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Hero Section */
+.hero-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    padding: 48px 0;
+    margin-bottom: 48px;
+}
+
+.hero-content {
+    max-width: 600px;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.hero-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Section Styles */
+.featured-section,
+.trending-section,
+.recent-section,
+.stats-section,
+.cta-section {
+    margin-bottom: 64px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.section-see-all {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.section-see-all:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Story Cards */
+.story-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.story-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.story-card-content {
+    padding: 20px;
+}
+
+.story-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.story-card-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.story-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.story-card-category {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.story-card-views,
+.story-card-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Trending Cards */
+.trending-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.trending-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s;
+}
+
+.trending-card:hover {
+    transform: translateY(-2px);
+}
+
+.trending-rank {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 40px;
+}
+
+.trending-content {
+    flex: 1;
+}
+
+.trending-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.trending-count {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.trending-change {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.trending-change.positive {
+    color: #10b981;
+}
+
+.trending-change.negative {
+    color: #ef4444;
+}
+
+.trending-link {
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.trending-link:hover {
+    background: var(--primary-color);
+    opacity: 0.9;
+}
+
+/* Stats Section */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+}
+
+.stat-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    border-radius: 20px;
+    padding: 64px 48px;
+    text-align: center;
+    color: white;
+}
+
+.cta-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.cta-description {
+    font-size: 20px;
+    margin-bottom: 32px;
+    opacity: 0.9;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-buttons .btn {
+    background: white;
+    color: var(--primary-color);
+    border: none;
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 30px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.cta-buttons .btn-outline-primary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.cta-buttons .btn-outline-primary:hover {
+    background: white;
+    color: var(--primary-color);
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin-bottom: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .hero-section {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 36px;
+    }
+    
+    .hero-subtitle {
+        font-size: 18px;
+    }
+    
+    .section-title {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 32px 0;
+    }
+    
+    .hero-title {
+        font-size: 32px;
+    }
+    
+    .hero-actions {
+        justify-content: center;
+    }
+    
+    .stories-grid,
+    .trending-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .cta-section {
+        padding: 48px 24px;
+    }
+    
+    .cta-title {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 28px;
+    }
+    
+    .hero-subtitle {
+        font-size: 16px;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-section {
+        padding: 32px 16px;
+    }
+    
+    .cta-title {
+        font-size: 24px;
+    }
+    
+    .cta-description {
+        font-size: 16px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize story cards and infinite scroll
+document.addEventListener('DOMContentLoaded', function() {
+    YouTubeLayout.initializeStoryCards();
+    YouTubeLayout.initializeInfiniteScroll();
+});
+</script>
+{% endblock %}

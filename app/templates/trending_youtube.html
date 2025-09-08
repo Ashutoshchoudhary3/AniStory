@@ -1,0 +1,184 @@
+{% extends "base_youtube.html" %}
+
+{% block title %}Trending Topics - ChronoStories{% endblock %}
+
+{% block content %}
+<div class="trending-container">
+    <div class="page-header">
+        <h1 class="page-title">Trending Topics</h1>
+        <p class="page-subtitle">Discover the latest trending topics that are shaping stories</p>
+    </div>
+
+    <div class="trending-content">
+        {% if trending_topics %}
+            <div class="trending-grid">
+                {% for topic in trending_topics %}
+                <div class="trending-card">
+                    <div class="trending-header">
+                        <span class="trending-rank">#{{ loop.index }}</span>
+                        <span class="trending-score">{{ "%.1f"|format(topic.trend_score) }}</span>
+                    </div>
+                    <h3 class="trending-title">{{ topic.topic }}</h3>
+                    <p class="trending-description">{{ topic.description or 'No description available' }}</p>
+                    <div class="trending-meta">
+                        <span class="trending-category">{{ topic.category or 'General' }}</span>
+                        <span class="trending-date">{{ topic.discovered_at.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                    <div class="trending-status">
+                        <span class="status-badge status-{{ topic.status }}">{{ topic.status }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📈</div>
+                <h3>No trending topics available</h3>
+                <p>Check back later for the latest trending topics.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.trending-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.trending-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.trending-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trending-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.trending-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.trending-rank {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.trending-score {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.trending-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.trending-description {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.trending-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.trending-category {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.trending-date {
+    color: var(--text-secondary);
+}
+
+.trending-status {
+    text-align: center;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-pending {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+}
+
+.status-inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+}
+</style>
+{% endblock %}

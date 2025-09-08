@@ -1,0 +1,627 @@
+
+
+
+
+{% extends "base_youtube.html" %}
+
+{% block title %}{{ story.title }} - ChronoStories{% endblock %}
+
+{% block content %}
+<div class="story-detail-container">
+    <!-- Story Header -->
+    <div class="story-header">
+        <div class="story-meta">
+            <span class="story-category">{{ story.category or 'General' }}</span>
+            <span class="story-date">{{ story.created_at|timesince }}</span>
+        </div>
+        <h1 class="story-title">{{ story.title }}</h1>
+        <p class="story-summary">{{ story.summary }}</p>
+    </div>
+
+    <!-- Story Content -->
+    <div class="story-content">
+        <!-- Main Image -->
+        <div class="story-image-container">
+            <img src="{{ story.image_url or url_for('static', filename='img/placeholder.jpg') }}" 
+                 alt="{{ story.title }}" 
+                 class="story-main-image">
+        </div>
+
+        <!-- Story Text -->
+        <div class="story-text">
+            {{ story.content|safe }}
+        </div>
+
+        <!-- Story Actions -->
+        <div class="story-actions">
+            <div class="action-buttons">
+                <button class="action-btn" onclick="likeStory('{{ story.id }}')">
+                    <i class="fas fa-thumbs-up"></i>
+                    <span>{{ story.likes or 0 }}</span>
+                </button>
+                <button class="action-btn" onclick="dislikeStory('{{ story.id }}')">
+                    <i class="fas fa-thumbs-down"></i>
+                    <span>{{ story.dislikes or 0 }}</span>
+                </button>
+                <button class="action-btn" onclick="shareStory('{{ story.id }}')">
+                    <i class="fas fa-share"></i>
+                    Share
+                </button>
+                <button class="action-btn" onclick="saveStory('{{ story.id }}')">
+                    <i class="fas fa-bookmark"></i>
+                    Save
+                </button>
+            </div>
+            
+            <div class="story-stats">
+                <span class="stat-item">
+                    <i class="fas fa-eye"></i>
+                    {{ story.views or 0 }} views
+                </span>
+                <span class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    {{ story.reading_time or '5 min' }} read
+                </span>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        {% if story.tags %}
+        <div class="story-tags">
+            {% for tag in story.tags.split(',') %}
+            <span class="tag">{{ tag.strip() }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Related Stories -->
+    {% if related_stories %}
+    <div class="related-stories">
+        <h2 class="section-title">Related Stories</h2>
+        <div class="related-grid">
+            {% for related_story in related_stories %}
+            <div class="related-card" onclick="viewStory('{{ related_story.id }}')">
+                <img src="{{ related_story.image_url or url_for('static', filename='img/placeholder.jpg') }}" 
+                     alt="{{ related_story.title }}" 
+                     class="related-image">
+                <div class="related-content">
+                    <h3 class="related-title">{{ related_story.title }}</h3>
+                    <p class="related-summary">{{ related_story.summary or related_story.content[:100] }}...</p>
+                    <div class="related-meta">
+                        <span class="related-views">
+                            <i class="fas fa-eye"></i> {{ related_story.views or 0 }}
+                        </span>
+                        <span class="related-date">
+                            <i class="fas fa-clock"></i> {{ related_story.created_at|timesince }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h2 class="section-title">Comments</h2>
+        <div class="comment-form">
+            <textarea placeholder="Share your thoughts..." class="comment-input"></textarea>
+            <button class="comment-submit" onclick="submitComment()">Post Comment</button>
+        </div>
+        <div class="comments-list" id="commentsList">
+            <!-- Comments will be loaded here -->
+            <div class="empty-comments">
+                <i class="fas fa-comments"></i>
+                <p>No comments yet. Be the first to comment!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Story Detail Styles */
+.story-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Story Header */
+.story-header {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.story-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.story-category {
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-weight: 500;
+}
+
+.story-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.story-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.story-summary {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Story Content */
+.story-content {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.story-image-container {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.story-main-image {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.story-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 32px;
+}
+
+.story-text p {
+    margin-bottom: 16px;
+}
+
+.story-text h1, .story-text h2, .story-text h3 {
+    margin: 24px 0 16px;
+    color: var(--text-primary);
+}
+
+/* Story Actions */
+.story-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0;
+    border-top: 1px solid var(--border-color, #e5e7eb);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-primary, #f8f9fa);
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 24px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.action-btn.liked {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.story-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Tags */
+.story-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    background: var(--bg-primary, #f8f9fa);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+/* Related Stories */
+.related-stories {
+    margin-bottom: 48px;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.related-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.related-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.related-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.related-content {
+    padding: 20px;
+}
+
+.related-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.related-summary {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.related-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.related-views,
+.related-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Comments Section */
+.comments-section {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.comment-form {
+    margin-bottom: 32px;
+}
+
+.comment-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 16px;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 16px;
+}
+
+.comment-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.comment-submit {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.comment-submit:hover {
+    background: var(--primary-hover);
+}
+
+.comments-list {
+    min-height: 200px;
+}
+
+.empty-comments {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+}
+
+.empty-comments i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-comments p {
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .story-detail-container {
+        padding: 16px;
+    }
+    
+    .story-content {
+        padding: 24px;
+    }
+    
+    .story-title {
+        font-size: 28px;
+    }
+    
+    .story-summary {
+        font-size: 16px;
+    }
+    
+    .story-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-buttons {
+        justify-content: center;
+    }
+    
+    .story-stats {
+        justify-content: center;
+    }
+    
+    .related-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .comments-section {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .story-title {
+        font-size: 24px;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+</style>
+
+<script>
+// Story detail functionality
+function likeStory(storyId) {
+    fetch(`/api/stories/${storyId}/like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const likeBtn = event.target.closest('.action-btn');
+            likeBtn.classList.toggle('liked');
+            const likeCount = likeBtn.querySelector('span');
+            if (likeCount) {
+                likeCount.textContent = data.likes;
+            }
+        }
+    })
+    .catch(console.error);
+}
+
+function dislikeStory(storyId) {
+    fetch(`/api/stories/${storyId}/dislike`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const dislikeBtn = event.target.closest('.action-btn');
+            dislikeBtn.classList.toggle('disliked');
+            const dislikeCount = dislikeBtn.querySelector('span');
+            if (dislikeCount) {
+                dislikeCount.textContent = data.dislikes;
+            }
+        }
+    })
+    .catch(console.error);
+}
+
+function shareStory(storyId) {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ story.title }}',
+            text: '{{ story.summary }}',
+            url: `${window.location.origin}/stories/${storyId}`
+        });
+    } else {
+        // Fallback: copy to clipboard
+        const url = `${window.location.origin}/stories/${storyId}`;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Story link copied to clipboard!');
+        });
+    }
+}
+
+function saveStory(storyId) {
+    fetch(`/api/stories/${storyId}/save`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const saveBtn = event.target.closest('.action-btn');
+            saveBtn.classList.toggle('saved');
+            saveBtn.querySelector('i').className = data.saved ? 'fas fa-bookmark' : 'far fa-bookmark';
+        }
+    })
+    .catch(console.error);
+}
+
+function viewStory(storyId) {
+    window.location.href = `/stories/${storyId}`;
+}
+
+function submitComment() {
+    const commentInput = document.querySelector('.comment-input');
+    const comment = commentInput.value.trim();
+    
+    if (!comment) {
+        alert('Please write a comment');
+        return;
+    }
+    
+    fetch(`/api/stories/{{ story.id }}/comments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment: comment })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            commentInput.value = '';
+            loadComments();
+        } else {
+            alert('Failed to post comment');
+        }
+    })
+    .catch(console.error);
+}
+
+function loadComments() {
+    fetch(`/api/stories/{{ story.id }}/comments`)
+    .then(response => response.json())
+    .then(data => {
+        const commentsList = document.getElementById('commentsList');
+        if (data.comments && data.comments.length > 0) {
+            commentsList.innerHTML = data.comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.author}</span>
+                        <span class="comment-date">${comment.date}</span>
+                    </div>
+                    <div class="comment-text">${comment.text}</div>
+                </div>
+            `).join('');
+        }
+    })
+    .catch(console.error);
+}
+
+// Initialize story detail page
+document.addEventListener('DOMContentLoaded', function() {
+    YouTubeLayout.initializeStoryDetail();
+    loadComments();
+});
+</script>
+{% endblock %}
+
+
+
