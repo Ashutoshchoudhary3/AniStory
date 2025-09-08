@@ -136,7 +136,7 @@ def get_recent_activity(limit=5):
 
 @main_bp.route('/')
 def index():
-    """Home page with dashboard overview"""
+    """Home page with different views for logged-in vs non-logged-in users"""
     logger.info("Index route accessed")
     try:
         # Check if user is logged in
@@ -144,111 +144,104 @@ def index():
         is_logged_in_flag = is_logged_in()
         logger.info(f"User logged in: {is_logged_in_flag}")
         
-        # Get statistics - filter based on authentication
         if is_logged_in_flag:
-            # Logged-in users can see all stories
-            total_stories = Story.query.count()
+            # YouTube-style home page for logged-in users
+            return render_youtube_homepage(current_user)
         else:
-            # Non-logged-in users can only see public stories
-            total_stories = Story.query.filter(Story.user_id.is_(None)).count()
-        
-        total_views = db.session.query(db.func.sum(Story.views)).scalar() or 0
-        stories_today = Story.query.filter(
-            Story.created_at >= datetime.utcnow() - timedelta(days=1)
-        ).count()
-        
-        # Get recent stories - filter based on authentication
-        if is_logged_in_flag:
-            recent_stories = Story.query.order_by(Story.created_at.desc()).limit(6).all()
-        else:
-            recent_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.created_at.desc()).limit(6).all()
-        
-        # Get popular stories - filter based on authentication
-        if is_logged_in_flag:
-            popular_stories = Story.query.order_by(Story.views.desc()).limit(6).all()
-        else:
-            popular_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.views.desc()).limit(6).all()
-        
-        # Get recent activity
-        recent_activity = get_recent_activity()
-        
-        # Get trending topics from database
-        trending_topics = Trend.query.filter(
-            Trend.status == 'active',
-            Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
-        ).order_by(Trend.trend_score.desc()).limit(10).all()
-        
-        # Get analytics data
-        analytics_data = {
-            'total_views_7d': db.session.query(db.func.sum(Analytics.metric_value)).filter(
-                Analytics.metric_type == 'view',
-                Analytics.created_at >= datetime.utcnow() - timedelta(days=7)
-            ).scalar() or 0,
-            'total_clicks_7d': db.session.query(db.func.sum(Analytics.metric_value)).filter(
-                Analytics.metric_type == 'click',
-                Analytics.created_at >= datetime.utcnow() - timedelta(days=7)
-            ).scalar() or 0,
-            'engagement_rate': db.session.query(db.func.avg(Analytics.metric_value)).filter(
-                Analytics.metric_type == 'engagement',
-                Analytics.created_at >= datetime.utcnow() - timedelta(days=7)
-            ).scalar() or 0
-        }
-        
-        # Get AI brain status
-        ai_status = {
-            'status': 'active',
-            'last_activity': datetime.utcnow(),
-            'stories_generated_today': stories_today,
-            'active_trends': len(trending_topics),
-            'recent_errors': []
-        }
-        
-        # Get personalized stories for logged-in users
-        personalized_stories = []
-        if is_logged_in_flag and current_user:
-            # Simple personalization: show stories from user's preferred categories
-            # For now, we'll show recent stories that match user's interests
-            # Default to technology and science categories for logged-in users
-            preferred_categories = ['technology', 'science']
-            personalized_stories = Story.query.filter(
-                Story.category.in_(preferred_categories)
-            ).order_by(Story.created_at.desc()).limit(6).all()
-            
-            # If no stories match preferred categories, show recent stories
-            if not personalized_stories:
-                personalized_stories = Story.query.order_by(Story.created_at.desc()).limit(6).all()
-        
-        logger.info(f"Index route debug - total_stories: {total_stories}, recent_stories: {len(recent_stories)}, popular_stories: {len(popular_stories)}, personalized_stories: {len(personalized_stories) if personalized_stories else 0}, trending_topics: {len(trending_topics)}")
-        
-        return render_template('index_youtube.html',
-                             total_stories=total_stories,
-                             total_views=total_views,
-                             stories_today=stories_today,
-                             recent_stories=recent_stories,
-                             popular_stories=popular_stories,
-                             recent_activity=recent_activity,
-                             trending_topics=trending_topics,
-                             personalized_stories=personalized_stories,
-                             analytics_data=analytics_data,
-                             ai_status=ai_status,
-                             is_logged_in=is_logged_in_flag,
-                             current_user=current_user)
+            # Landing page for non-registered users
+            return render_landing_page()
     except Exception as e:
-        flash(f'Error loading dashboard: {str(e)}', 'error')
+        flash(f'Error loading home page: {str(e)}', 'error')
         logger.error(f"Error in index route: {str(e)}", exc_info=True)
-        return render_template('index_youtube.html',
-                             total_stories=0,
-                             total_views=0,
-                             stories_today=0,
-                             recent_stories=[],
-                             popular_stories=[],
-                             recent_activity=[],
-                             trending_topics=[],
-                             personalized_stories=[],
-                             analytics_data={'total_views_7d': 0, 'total_clicks_7d': 0, 'engagement_rate': 0},
-                             ai_status={'status': 'inactive', 'last_activity': None, 'stories_generated_today': 0, 'active_trends': 0, 'recent_errors': []},
-                             is_logged_in=False,
-                             current_user=None)
+        return render_landing_page()
+
+def render_youtube_homepage(current_user):
+    """Render YouTube-style homepage for logged-in users"""
+    # Get all stories for logged-in users
+    total_stories = Story.query.count()
+    total_views = db.session.query(db.func.sum(Story.views)).scalar() or 0
+    stories_today = Story.query.filter(
+        Story.created_at >= datetime.utcnow() - timedelta(days=1)
+    ).count()
+    
+    # Get recent stories
+    recent_stories = Story.query.order_by(Story.created_at.desc()).limit(12).all()
+    
+    # Get popular stories
+    popular_stories = Story.query.order_by(Story.views.desc()).limit(12).all()
+    
+    # Get personalized stories based on user preferences
+    personalized_stories = []
+    if current_user:
+        # Default to technology and science categories for personalization
+        preferred_categories = ['technology', 'science']
+        personalized_stories = Story.query.filter(
+            Story.category.in_(preferred_categories)
+        ).order_by(Story.created_at.desc()).limit(12).all()
+        
+        # If no stories match preferred categories, show recent stories
+        if not personalized_stories:
+            personalized_stories = Story.query.order_by(Story.created_at.desc()).limit(12).all()
+    
+    # Get trending topics
+    trending_topics = Trend.query.filter(
+        Trend.status == 'active',
+        Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+    ).order_by(Trend.trend_score.desc()).limit(10).all()
+    
+    # Get user's personal stories
+    user_stories = []
+    if current_user:
+        user_stories = Story.query.filter_by(user_id=current_user.id).order_by(Story.created_at.desc()).limit(6).all()
+    
+    return render_template('index_youtube.html',
+                         total_stories=total_stories,
+                         total_views=total_views,
+                         stories_today=stories_today,
+                         recent_stories=recent_stories,
+                         popular_stories=popular_stories,
+                         personalized_stories=personalized_stories,
+                         trending_topics=trending_topics,
+                         user_stories=user_stories,
+                         is_logged_in=True,
+                         current_user=current_user)
+
+def render_landing_page():
+    """Render landing page for non-registered users"""
+    # Get only public stories for non-logged-in users
+    total_stories = Story.query.filter(Story.user_id.is_(None)).count()
+    total_views = db.session.query(db.func.sum(Story.views)).scalar() or 0
+    
+    # Get recent public stories
+    recent_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.created_at.desc()).limit(6).all()
+    
+    # Get popular public stories
+    popular_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.views.desc()).limit(6).all()
+    
+    # Get trending topics
+    trending_topics = Trend.query.filter(
+        Trend.status == 'active',
+        Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+    ).order_by(Trend.trend_score.desc()).limit(6).all()
+    
+    return render_template('index_youtube.html',
+                         total_stories=total_stories,
+                         total_views=total_views,
+                         stories_today=0,
+                         recent_stories=recent_stories,
+                         popular_stories=popular_stories,
+                         personalized_stories=[],
+                         trending_topics=trending_topics,
+                         recent_activity=[],
+                         analytics_data={'total_views_7d': 0, 'total_clicks_7d': 0, 'engagement_rate': 0},
+                         ai_status={'status': 'active', 'last_activity': datetime.utcnow(), 'stories_generated_today': 0, 'active_trends': len(trending_topics), 'recent_errors': []},
+                         is_logged_in=False,
+                         current_user=None)
+
+@main_bp.route('/stories')
+def stories_redirect():
+    """Redirect /stories to /stories/ to avoid 308 redirect"""
+    return redirect(url_for('stories.stories_list'), code=302)
 
 @main_bp.route('/trending')
 def trending():
@@ -487,12 +480,16 @@ def category(category):
             .order_by(Story.created_at.desc())\
             .paginate(page=page, per_page=12, error_out=False)
         
+        # Get trending topics for sidebar
+        trending_topics = Trend.query.order_by(Trend.trend_score.desc()).limit(10).all()
+        
         return render_template('stories_list_youtube.html', 
                              stories=stories.items,
                              pagination=stories,
                              title=f"{category.title()} Stories",
                              current_category=category,
-                             current_user=get_current_user())
+                             current_user=get_current_user(),
+                             trending_topics=trending_topics)
     except Exception as e:
         logger.error(f"Error loading category {category}: {e}")
         return render_template('error.html', error="Failed to load category"), 500

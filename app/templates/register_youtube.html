@@ -147,7 +147,7 @@
 </div>
 
 <style>
-/* Auth Styles */
+/* Auth Styles - Updated with responsive fixes */
 .auth-container {
     min-height: 100vh;
     display: flex;
@@ -155,6 +155,13 @@
     justify-content: center;
     padding: 24px;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    /* Override any conflicting grid layouts */
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    position: relative !important;
+    overflow-x: hidden !important;
 }
 
 .auth-card {
@@ -165,6 +172,54 @@
     max-width: 400px;
     width: 100%;
     margin-right: 48px;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 968px) {
+    .auth-container {
+        flex-direction: column !important;
+        padding: 16px !important;
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100vh !important;
+    }
+    
+    .auth-card {
+        margin-right: 0 !important;
+        margin-bottom: 24px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 32px !important;
+    }
+    
+    .auth-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 12px !important;
+    }
+    
+    .auth-card {
+        padding: 24px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .auth-title {
+        font-size: 24px !important;
+    }
+    
+    .auth-logo {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 24px !important;
+    }
 }
 
 .auth-header {
@@ -410,21 +465,26 @@
     line-height: 1.5;
 }
 
-/* Responsive Design */
+/* Responsive Design - Fixed layout issues */
 @media (max-width: 1024px) {
     .auth-container {
         flex-direction: column;
         padding: 16px;
+        /* Ensure proper height calculation */
+        min-height: 100vh;
+        height: auto;
     }
     
     .auth-card {
         margin-right: 0;
         margin-bottom: 32px;
         max-width: 500px;
+        width: 100%;
     }
     
     .auth-info {
         max-width: 500px;
+        width: 100%;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 16px;
@@ -452,8 +512,14 @@
 }
 
 @media (max-width: 480px) {
+    .auth-container {
+        padding: 12px;
+        min-height: 100vh;
+    }
+    
     .auth-card {
         padding: 24px 16px;
+        margin-bottom: 24px;
     }
     
     .auth-title {
@@ -473,6 +539,26 @@
     .auth-button {
         padding: 12px;
         font-size: 14px;
+    }
+}
+
+/* Additional fixes for the "half screen covered" issue */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* Ensure main content area doesn't interfere */
+main {
+    overflow: visible;
+    padding: 0;
+}
+
+/* Fix for iOS Safari viewport issues */
+@supports (-webkit-touch-callout: none) {
+    .auth-container {
+        min-height: -webkit-fill-available;
     }
 }
 </style>

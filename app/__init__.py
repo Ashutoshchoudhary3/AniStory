@@ -33,11 +33,8 @@ def create_app():
     logger = logging.getLogger(__name__)
     
     # Register blueprints
-    from app.routes import main_bp, api_bp, stories_bp, auth_bp
-    app.register_blueprint(main_bp)
-    app.register_blueprint(api_bp, url_prefix='/api')
-    app.register_blueprint(stories_bp, url_prefix='/stories')
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+    from app.routes import register_blueprints
+    register_blueprints(app)
     
     # Register custom Jinja filters
     from datetime import datetime, timedelta
