@@ -1,0 +1,913 @@
+
+
+
+
+
+{% extends "base_youtube.html" %}
+
+{% block title %}Dashboard - ChronoStories{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">AI Brain Dashboard</h1>
+        <p class="dashboard-subtitle">Monitor your autonomous AI story generation system</p>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value">{{ metrics.total_stories }}</h3>
+                <p class="metric-label">Total Stories</p>
+                <span class="metric-change positive">+{{ metrics.total_stories }} generated</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value">{{ metrics.published_stories }}</h3>
+                <p class="metric-label">Published Stories</p>
+                <span class="metric-change positive">{{ "%.1f"|format(metrics.success_rate) }}% success rate</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value">{{ metrics.total_views }}</h3>
+                <p class="metric-label">Total Views</p>
+                <span class="metric-change positive">+{{ metrics.avg_views_per_story|round(1) }} avg per story</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value">{{ metrics.failed_stories }}</h3>
+                <p class="metric-label">Failed Stories</p>
+                <span class="metric-change negative">Requires attention</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Brain Status -->
+    <div class="ai-brain-section">
+        <div class="section-header">
+            <h2 class="section-title">AI Brain Status</h2>
+            <div class="status-indicator active">
+                <span class="status-dot"></span>
+                <span class="status-text">Active</span>
+            </div>
+        </div>
+        
+        <div class="ai-brain-grid">
+            <div class="ai-brain-card">
+                <div class="card-header">
+                    <h3 class="card-title">Content Generation</h3>
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="card-content">
+                    <div class="progress-item">
+                        <span class="progress-label">Stories Today</span>
+                        <span class="progress-value">{{ metrics.total_stories }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ metrics.total_stories_progress }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-brain-card">
+                <div class="card-header">
+                    <h3 class="card-title">Trend Analysis</h3>
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="card-content">
+                    <div class="progress-item">
+                        <span class="progress-label">Active Trends</span>
+                        <span class="progress-value">{{ active_trends }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ metrics.active_trends_progress }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-brain-card">
+                <div class="card-header">
+                    <h3 class="card-title">System Health</h3>
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="card-content">
+                    <div class="health-metrics">
+                        <div class="health-item">
+                            <span class="health-label">API Response Time</span>
+                            <span class="health-value good">245ms</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-label">Memory Usage</span>
+                            <span class="health-value good">68%</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-label">Queue Size</span>
+                            <span class="health-value good">12</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-section">
+        <div class="section-header">
+            <h2 class="section-title">Recent Activity</h2>
+            <button class="refresh-btn" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+        </div>
+        
+        <div class="activity-grid">
+            <div class="activity-card">
+                <h3 class="activity-title">Latest Stories</h3>
+                <div class="activity-list">
+                    {% if recent_analytics %}
+                        {% for activity in recent_analytics[:5] %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">Story generated: {{ activity.story.title if activity.story else 'Unknown' }}</p>
+                                <span class="activity-time">{{ activity.created_at|timesince }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-activity">
+                            <i class="fas fa-inbox"></i>
+                            <p>No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="activity-card">
+                <h3 class="activity-title">System Logs</h3>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">AI Brain initialized successfully</p>
+                            <span class="activity-time">2 minutes ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon info">
+                            <i class="fas fa-info"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">Started trending topic analysis</p>
+                            <span class="activity-time">5 minutes ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon warning">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">Rate limit warning: GNews API</p>
+                            <span class="activity-time">12 minutes ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Charts -->
+    <div class="charts-section">
+        <div class="section-header">
+            <h2 class="section-title">Performance Analytics</h2>
+            <div class="chart-controls">
+                <button class="chart-btn active" data-period="7d">7 Days</button>
+                <button class="chart-btn" data-period="30d">30 Days</button>
+                <button class="chart-btn" data-period="90d">90 Days</button>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Story Generation Rate</h3>
+                <div class="chart-placeholder">
+                    <div class="chart-bar" style="height: 60%"></div>
+                    <div class="chart-bar" style="height: 80%"></div>
+                    <div class="chart-bar" style="height: 45%"></div>
+                    <div class="chart-bar" style="height: 90%"></div>
+                    <div class="chart-bar" style="height: 70%"></div>
+                    <div class="chart-bar" style="height: 85%"></div>
+                    <div class="chart-bar" style="height: 65%"></div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">Category Performance</h3>
+                <div class="category-chart">
+                    <div class="category-item">
+                        <span class="category-label">Technology</span>
+                        <div class="category-bar">
+                            <div class="category-fill" style="width: 85%"></div>
+                        </div>
+                        <span class="category-value">85%</span>
+                    </div>
+                    <div class="category-item">
+                        <span class="category-label">Science</span>
+                        <div class="category-bar">
+                            <div class="category-fill" style="width: 72%"></div>
+                        </div>
+                        <span class="category-value">72%</span>
+                    </div>
+                    <div class="category-item">
+                        <span class="category-label">Entertainment</span>
+                        <div class="category-bar">
+                            <div class="category-fill" style="width: 68%"></div>
+                        </div>
+                        <span class="category-value">68%</span>
+                    </div>
+                    <div class="category-item">
+                        <span class="category-label">Sports</span>
+                        <div class="category-bar">
+                            <div class="category-fill" style="width: 45%"></div>
+                        </div>
+                        <span class="category-value">45%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Dashboard Styles */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.dashboard-header {
+    margin-bottom: 32px;
+}
+
+.dashboard-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.dashboard-subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.metric-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.metric-content {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.metric-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.metric-change {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.metric-change.positive {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.metric-change.negative {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* AI Brain Section */
+.ai-brain-section {
+    margin-bottom: 48px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-indicator.active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.ai-brain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.ai-brain-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.card-header i {
+    font-size: 24px;
+    color: var(--primary-color);
+}
+
+.progress-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.progress-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.progress-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--bg-primary, #f8f9fa);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.health-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.health-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.health-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.health-value {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.health-value.good {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.health-value.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.health-value.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Activity Section */
+.activity-section {
+    margin-bottom: 48px;
+}
+
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.refresh-btn:hover {
+    background: var(--primary-hover);
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+.activity-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.activity-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-primary, #f8f9fa);
+    border-radius: 8px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.activity-icon.success {
+    background: #22c55e;
+}
+
+.activity-icon.info {
+    background: #3b82f6;
+}
+
+.activity-icon.warning {
+    background: #f59e0b;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.activity-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.empty-activity {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-secondary);
+}
+
+.empty-activity i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-activity p {
+    font-size: 14px;
+}
+
+/* Charts Section */
+.charts-section {
+    margin-bottom: 48px;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.chart-btn {
+    padding: 8px 16px;
+    background: var(--bg-primary, #f8f9fa);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-btn.active,
+.chart-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.chart-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.chart-placeholder {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    height: 200px;
+    padding: 20px;
+    background: var(--bg-primary, #f8f9fa);
+    border-radius: 8px;
+}
+
+.chart-bar {
+    width: 30px;
+    background: var(--primary-color);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.3s ease;
+}
+
+.category-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.category-label {
+    min-width: 100px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.category-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-primary, #f8f9fa);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.category-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.category-value {
+    min-width: 40px;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .activity-grid,
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 16px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    
+    .status-indicator {
+        justify-content: center;
+    }
+    
+    .ai-brain-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .activity-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .chart-placeholder {
+        height: 150px;
+    }
+    
+    .category-item {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .category-label {
+        min-width: auto;
+    }
+}
+</style>
+
+<script>
+// Dashboard functionality
+function refreshDashboard() {
+    const refreshBtn = document.querySelector('.refresh-btn');
+    const icon = refreshBtn.querySelector('i');
+    
+    // Add loading animation
+    icon.classList.add('fa-spin');
+    refreshBtn.disabled = true;
+    
+    // Simulate refresh
+    setTimeout(() => {
+        icon.classList.remove('fa-spin');
+        refreshBtn.disabled = false;
+        
+        // Show success message
+        showNotification('Dashboard refreshed successfully', 'success');
+        
+        // Reload page to get latest data
+        window.location.reload();
+    }, 2000);
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Chart controls
+document.querySelectorAll('.chart-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Here you would typically update the chart data
+        const period = this.dataset.period;
+        console.log(`Switching to ${period} view`);
+        
+        // Simulate chart update
+        updateCharts(period);
+    });
+});
+
+function updateCharts(period) {
+    // Simulate chart data update
+    const chartBars = document.querySelectorAll('.chart-bar');
+    chartBars.forEach(bar => {
+        const newHeight = Math.random() * 80 + 20; // Random height between 20-100%
+        bar.style.height = `${newHeight}%`;
+    });
+    
+    // Update category performance data
+    const categoryFills = document.querySelectorAll('.category-fill');
+    categoryFills.forEach(fill => {
+        const newWidth = Math.random() * 60 + 40; // Random width between 40-100%
+        fill.style.width = `${newWidth}%`;
+        fill.parentElement.nextElementSibling.textContent = `${Math.round(newWidth)}%`;
+    });
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    YouTubeLayout.initializeDashboard();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+        refreshDashboard();
+    }, 30000);
+});
+
+// Add notification styles
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--bg-secondary, #fff);
+        color: var(--text-primary);
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 1000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .notification.show {
+        transform: translateX(0);
+    }
+    
+    .notification-success {
+        border-left-color: #22c55e;
+    }
+    
+    .notification-error {
+        border-left-color: #ef4444;
+    }
+    
+    .notification i {
+        font-size: 20px;
+    }
+`;
+document.head.appendChild(notificationStyles);
+</script>
+{% endblock %}
+
+
+
+

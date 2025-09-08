@@ -20,7 +20,7 @@ class Config:
     # Flask
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
     ENV = os.getenv('FLASK_ENV', 'development')
-    SERVER_NAME = os.getenv('SERVER_NAME', 'localhost:40268')
+    SERVER_NAME = os.getenv('SERVER_NAME', 'localhost:46548')
     APPLICATION_ROOT = os.getenv('APPLICATION_ROOT', '/')
     PREFERRED_URL_SCHEME = os.getenv('PREFERRED_URL_SCHEME', 'http')
     

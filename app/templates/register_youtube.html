@@ -1,0 +1,681 @@
+
+
+
+
+
+
+
+
+{% extends "base_youtube.html" %}
+
+{% block title %}Register - ChronoStories{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h1 class="auth-title">Create Your Account</h1>
+            <p class="auth-subtitle">Join the future of AI-powered content creation</p>
+        </div>
+
+        <form class="auth-form" method="POST" action="{{ url_for('auth.signup') }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    {{ form.username(class="form-input", placeholder="Choose a username") }}
+                </div>
+                {% if form.username.errors %}
+                <div class="form-error">
+                    {% for error in form.username.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    {{ form.email(class="form-input", placeholder="Enter your email") }}
+                </div>
+                {% if form.email.errors %}
+                <div class="form-error">
+                    {% for error in form.email.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form.password(class="form-input", placeholder="Create a password") }}
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                <div class="form-error">
+                    {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form.confirm_password(class="form-input", placeholder="Confirm your password") }}
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                {% if form.confirm_password.errors %}
+                <div class="form-error">
+                    {% for error in form.confirm_password.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-group">
+                    {{ form.agree_terms() }}
+                    <span class="checkmark"></span>
+                    <span class="checkbox-label">I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a></span>
+                </label>
+                {% if form.agree_terms.errors %}
+                <div class="form-error">
+                    {% for error in form.agree_terms.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="auth-button">
+                <span class="button-text">Create Account</span>
+                <i class="fas fa-arrow-right button-icon"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p class="auth-text">
+                Already have an account? 
+                <a href="{{ url_for('auth.login') }}" class="auth-link">Sign in here</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="auth-info">
+        <div class="info-card">
+            <div class="info-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="info-title">AI-Powered</h3>
+            <p class="info-text">Experience the future of content creation with our autonomous AI story engine</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="info-title">Real-time Analytics</h3>
+            <p class="info-text">Monitor your story performance and AI system health in real-time</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="info-title">Secure & Private</h3>
+            <p class="info-text">Your data is protected with enterprise-grade security measures</p>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Auth Styles - Updated with responsive fixes */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    /* Override any conflicting grid layouts */
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+}
+
+.auth-card {
+    background: var(--bg-secondary, #fff);
+    border-radius: 20px;
+    padding: 48px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+    margin-right: 48px;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 968px) {
+    .auth-container {
+        flex-direction: column !important;
+        padding: 16px !important;
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100vh !important;
+    }
+    
+    .auth-card {
+        margin-right: 0 !important;
+        margin-bottom: 24px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 32px !important;
+    }
+    
+    .auth-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 12px !important;
+    }
+    
+    .auth-card {
+        padding: 24px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .auth-title {
+        font-size: 24px !important;
+    }
+    
+    .auth-logo {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 24px !important;
+    }
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.auth-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.auth-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.auth-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.auth-form {
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    z-index: 1;
+}
+
+.form-input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: all 0.2s;
+    background: var(--bg-primary, #f8f9fa);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: var(--bg-secondary, #fff);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+}
+
+.form-error {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #ef4444;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.checkbox-group input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 4px;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.checkbox-group input[type="checkbox"]:checked + .checkmark {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox-group input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.checkbox-label {
+    user-select: none;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.auth-button:active {
+    transform: translateY(0);
+}
+
+.button-icon {
+    transition: transform 0.2s;
+}
+
+.auth-button:hover .button-icon {
+    transform: translateX(4px);
+}
+
+.auth-footer {
+    text-align: center;
+}
+
+.auth-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.auth-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Info Section */
+.auth-info {
+    max-width: 300px;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.info-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+
+.info-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.info-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+/* Responsive Design - Fixed layout issues */
+@media (max-width: 1024px) {
+    .auth-container {
+        flex-direction: column;
+        padding: 16px;
+        /* Ensure proper height calculation */
+        min-height: 100vh;
+        height: auto;
+    }
+    
+    .auth-card {
+        margin-right: 0;
+        margin-bottom: 32px;
+        max-width: 500px;
+        width: 100%;
+    }
+    
+    .auth-info {
+        max-width: 500px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 32px 24px;
+    }
+    
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .auth-title {
+        font-size: 24px;
+    }
+    
+    .auth-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 12px;
+        min-height: 100vh;
+    }
+    
+    .auth-card {
+        padding: 24px 16px;
+        margin-bottom: 24px;
+    }
+    
+    .auth-title {
+        font-size: 20px;
+    }
+    
+    .form-input {
+        padding: 12px 12px 12px 40px;
+        font-size: 14px;
+    }
+    
+    .input-icon {
+        left: 12px;
+        font-size: 14px;
+    }
+    
+    .auth-button {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+/* Additional fixes for the "half screen covered" issue */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* Ensure main content area doesn't interfere */
+main {
+    overflow: visible;
+    padding: 0;
+}
+
+/* Fix for iOS Safari viewport issues */
+@supports (-webkit-touch-callout: none) {
+    .auth-container {
+        min-height: -webkit-fill-available;
+    }
+}
+</style>
+
+<script>
+// Register functionality
+function togglePassword(fieldName) {
+    const passwordInput = document.querySelector(`input[name="${fieldName}"]`);
+    const toggleBtn = passwordInput.parentElement.querySelector('.password-toggle i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.className = 'fas fa-eye';
+    }
+}
+
+// Form validation
+document.querySelector('.auth-form').addEventListener('submit', function(e) {
+    const username = document.querySelector('input[name="username"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const password = document.querySelector('input[name="password"]').value;
+    const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+    const agreeTerms = document.querySelector('input[name="agree_terms"]').checked;
+    
+    let hasError = false;
+    
+    if (!username) {
+        showError('Please enter a username');
+        hasError = true;
+    } else if (username.length < 3) {
+        showError('Username must be at least 3 characters long');
+        hasError = true;
+    }
+    
+    if (!email) {
+        showError('Please enter your email address');
+        hasError = true;
+    } else if (!isValidEmail(email)) {
+        showError('Please enter a valid email address');
+        hasError = true;
+    }
+    
+    if (!password) {
+        showError('Please create a password');
+        hasError = true;
+    } else if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        hasError = true;
+    }
+    
+    if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        hasError = true;
+    }
+    
+    if (!agreeTerms) {
+        showError('You must agree to the Terms of Service');
+        hasError = true;
+    }
+    
+    if (hasError) {
+        e.preventDefault();
+    }
+});
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function showError(message) {
+    // Remove existing error
+    const existingError = document.querySelector('.form-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Create new error
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'form-error';
+    errorDiv.innerHTML = `<span>${message}</span>`;
+    
+    // Add to first form group
+    const firstFormGroup = document.querySelector('.form-group');
+    firstFormGroup.appendChild(errorDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 5000);
+}
+
+// Initialize register page
+document.addEventListener('DOMContentLoaded', function() {
+    YouTubeLayout.initializeAuth();
+    
+    // Focus on username field
+    document.querySelector('input[name="username"]').focus();
+    
+    // Add enter key support for form submission
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            document.querySelector('.auth-form').dispatchEvent(new Event('submit'));
+        }
+    });
+});
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+

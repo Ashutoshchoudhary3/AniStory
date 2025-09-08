@@ -49,6 +49,16 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def is_logged_in():
+    """Check if user is logged in"""
+    return 'user_id' in session
+
+def get_current_user():
+    """Get current user object if logged in"""
+    if 'user_id' in session:
+        return User.query.get(session['user_id'])
+    return None
+
 def initialize_ai_brain():
     """Initialize the AI Brain system"""
     try:
@@ -126,65 +136,127 @@ def get_recent_activity(limit=5):
 
 @main_bp.route('/')
 def index():
-    """Home page with dashboard overview"""
+    """Home page with different views for logged-in vs non-logged-in users"""
+    logger.info("Index route accessed")
     try:
         # Check if user is logged in
         current_user = get_current_user()
         is_logged_in_flag = is_logged_in()
+        logger.info(f"User logged in: {is_logged_in_flag}")
         
-        # Get statistics - filter based on authentication
         if is_logged_in_flag:
-            # Logged-in users can see all stories
-            total_stories = Story.query.count()
+            # YouTube-style home page for logged-in users
+            return render_youtube_homepage(current_user)
         else:
-            # Non-logged-in users can only see public stories
-            total_stories = Story.query.filter(Story.user_id.is_(None)).count()
-        
-        total_views = db.session.query(db.func.sum(Story.views)).scalar() or 0
-        stories_today = Story.query.filter(
-            Story.created_at >= datetime.utcnow() - timedelta(days=1)
-        ).count()
-        
-        # Get recent stories - filter based on authentication
-        if is_logged_in_flag:
-            recent_stories = Story.query.order_by(Story.created_at.desc()).limit(6).all()
-        else:
-            recent_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.created_at.desc()).limit(6).all()
-        
-        # Get popular stories - filter based on authentication
-        if is_logged_in_flag:
-            popular_stories = Story.query.order_by(Story.views.desc()).limit(6).all()
-        else:
-            popular_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.views.desc()).limit(6).all()
-        
-        # Get recent activity
-        recent_activity = get_recent_activity()
-        
-        # Get trending topics (safe defaults for now)
-        trending_topics = []
-        
-        return render_template('index.html',
-                             total_stories=total_stories,
-                             total_views=total_views,
-                             stories_today=stories_today,
-                             recent_stories=recent_stories,
-                             popular_stories=popular_stories,
-                             recent_activity=recent_activity,
-                             trending_topics=trending_topics,
-                             is_logged_in=is_logged_in_flag,
-                             current_user=current_user)
+            # Landing page for non-registered users
+            return render_landing_page()
     except Exception as e:
-        flash(f'Error loading dashboard: {str(e)}', 'error')
-        return render_template('index.html',
-                             total_stories=0,
-                             total_views=0,
-                             stories_today=0,
-                             recent_stories=[],
-                             popular_stories=[],
-                             recent_activity=[],
-                             trending_topics=[],
-                             is_logged_in=False,
-                             current_user=None)
+        flash(f'Error loading home page: {str(e)}', 'error')
+        logger.error(f"Error in index route: {str(e)}", exc_info=True)
+        return render_landing_page()
+
+def render_youtube_homepage(current_user):
+    """Render YouTube-style homepage for logged-in users"""
+    # Get all stories for logged-in users
+    total_stories = Story.query.count()
+    total_views = db.session.query(db.func.sum(Story.views)).scalar() or 0
+    stories_today = Story.query.filter(
+        Story.created_at >= datetime.utcnow() - timedelta(days=1)
+    ).count()
+    
+    # Get recent stories
+    recent_stories = Story.query.order_by(Story.created_at.desc()).limit(12).all()
+    
+    # Get popular stories
+    popular_stories = Story.query.order_by(Story.views.desc()).limit(12).all()
+    
+    # Get personalized stories based on user preferences
+    personalized_stories = []
+    if current_user:
+        # Default to technology and science categories for personalization
+        preferred_categories = ['technology', 'science']
+        personalized_stories = Story.query.filter(
+            Story.category.in_(preferred_categories)
+        ).order_by(Story.created_at.desc()).limit(12).all()
+        
+        # If no stories match preferred categories, show recent stories
+        if not personalized_stories:
+            personalized_stories = Story.query.order_by(Story.created_at.desc()).limit(12).all()
+    
+    # Get trending topics
+    trending_topics = Trend.query.filter(
+        Trend.status == 'active',
+        Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+    ).order_by(Trend.trend_score.desc()).limit(10).all()
+    
+    # Get user's personal stories
+    user_stories = []
+    if current_user:
+        user_stories = Story.query.filter_by(user_id=current_user.id).order_by(Story.created_at.desc()).limit(6).all()
+    
+    return render_template('index_youtube.html',
+                         total_stories=total_stories,
+                         total_views=total_views,
+                         stories_today=stories_today,
+                         recent_stories=recent_stories,
+                         popular_stories=popular_stories,
+                         personalized_stories=personalized_stories,
+                         trending_topics=trending_topics,
+                         user_stories=user_stories,
+                         is_logged_in=True,
+                         current_user=current_user)
+
+def render_landing_page():
+    """Render landing page for non-registered users"""
+    # Get only public stories for non-logged-in users
+    total_stories = Story.query.filter(Story.user_id.is_(None)).count()
+    total_views = db.session.query(db.func.sum(Story.views)).scalar() or 0
+    
+    # Get recent public stories
+    recent_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.created_at.desc()).limit(6).all()
+    
+    # Get popular public stories
+    popular_stories = Story.query.filter(Story.user_id.is_(None)).order_by(Story.views.desc()).limit(6).all()
+    
+    # Get trending topics
+    trending_topics = Trend.query.filter(
+        Trend.status == 'active',
+        Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+    ).order_by(Trend.trend_score.desc()).limit(6).all()
+    
+    return render_template('index_youtube.html',
+                         total_stories=total_stories,
+                         total_views=total_views,
+                         stories_today=0,
+                         recent_stories=recent_stories,
+                         popular_stories=popular_stories,
+                         personalized_stories=[],
+                         trending_topics=trending_topics,
+                         recent_activity=[],
+                         analytics_data={'total_views_7d': 0, 'total_clicks_7d': 0, 'engagement_rate': 0},
+                         ai_status={'status': 'active', 'last_activity': datetime.utcnow(), 'stories_generated_today': 0, 'active_trends': len(trending_topics), 'recent_errors': []},
+                         is_logged_in=False,
+                         current_user=None)
+
+@main_bp.route('/stories')
+def stories_redirect():
+    """Redirect /stories to /stories/ to avoid 308 redirect"""
+    return redirect(url_for('stories.stories_list'), code=302)
+
+@main_bp.route('/trending')
+def trending():
+    """Trending topics page"""
+    try:
+        # Get trending topics from database
+        trending_topics = Trend.query.filter(
+            Trend.status == 'active',
+            Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+        ).order_by(Trend.trend_score.desc()).limit(50).all()
+        
+        return render_template('trending_youtube.html', trending_topics=trending_topics)
+    except Exception as e:
+        logger.error(f"Trending page error: {e}", exc_info=True)
+        return render_template('trending_youtube.html', trending_topics=[])
 
 @main_bp.route('/dashboard')
 def dashboard():
@@ -223,6 +295,12 @@ def dashboard():
         logger.debug(f"DEBUG: total_views={total_views}, type={type(total_views)}")
         logger.debug(f"DEBUG: avg_views_per_story={avg_views_per_story}, type={type(avg_views_per_story)}")
         
+        # Get trending topics from database
+        trending_topics = Trend.query.filter(
+            Trend.status == 'active',
+            Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+        ).order_by(Trend.trend_score.desc()).limit(10).all()
+        
         # Ensure all values are safe for template
         metrics = {
             'total_stories': int(total_stories) if total_stories is not None else 0,
@@ -230,33 +308,39 @@ def dashboard():
             'failed_stories': int(failed_stories) if failed_stories is not None else 0,
             'success_rate': float(success_rate) if success_rate is not None else 0.0,
             'total_views': int(total_views) if total_views is not None else 0,
-            'avg_views_per_story': float(avg_views_per_story) if avg_views_per_story is not None else 0.0
+            'avg_views_per_story': float(avg_views_per_story) if avg_views_per_story is not None else 0.0,
+            'total_stories_progress': int(total_stories) * 10 if total_stories is not None and int(total_stories) * 10 <= 100 else 100 if total_stories is not None else 0,
+            'active_trends_progress': len(trending_topics) * 20 if len(trending_topics) * 20 <= 100 else 100
         }
         
-        return render_template('dashboard.html',
+        return render_template('dashboard_youtube.html',
                              metrics=metrics,
                              recent_analytics=recent_analytics,
-                             active_trends=0,
+                             active_trends=len(trending_topics),
                              category_performance={},
-                             max_views=1)
+                             max_views=1,
+                             trending_topics=trending_topics)
     except Exception as e:
         logger.error(f"DEBUG: Dashboard error details: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         # Return safe defaults
-        return render_template('dashboard.html',
+        return render_template('dashboard_youtube.html',
                              metrics={
                                  'total_stories': 0,
                                  'published_stories': 0,
                                  'failed_stories': 0,
                                  'success_rate': 0,
                                  'total_views': 0,
-                                 'avg_views_per_story': 0
+                                 'avg_views_per_story': 0,
+                                 'total_stories_progress': 0,
+                                 'active_trends_progress': 0
                              },
                              recent_analytics=[],
                              active_trends=0,
                              category_performance={},
-                             max_views=1)
+                             max_views=1,
+                             trending_topics=[])
 
 @stories_bp.route('/')
 def stories_list():
@@ -301,11 +385,18 @@ def stories_list():
         # Paginate
         stories = query.paginate(page=page, per_page=12, error_out=False)
         
-        return render_template('stories_list.html',
+        # Get trending topics for sidebar
+        trending_topics = Trend.query.filter(
+            Trend.status == 'active',
+            Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+        ).order_by(Trend.trend_score.desc()).limit(10).all()
+        
+        return render_template('stories_list_youtube.html',
                              stories=stories,
                              categories=[],  # Will be populated in template
                              current_category=category_filter,
-                             is_logged_in=is_logged_in())
+                             is_logged_in=is_logged_in(),
+                             trending_topics=trending_topics)
     except Exception as e:
         logger.error(f"Error loading stories list: {e}")
         return render_template('error.html', error="Failed to load stories"), 500
@@ -341,7 +432,7 @@ def story_detail(story_id):
             Story.status == 'published'
         ).order_by(Story.created_at.desc()).limit(3).all()
         
-        return render_template('story_detail.html', 
+        return render_template('story_detail_youtube.html', 
                              story=story, 
                              related_stories=related_stories,
                              is_logged_in=is_logged_in(),
@@ -349,6 +440,94 @@ def story_detail(story_id):
     except Exception as e:
         logger.error(f"Error loading story {story_id}: {e}")
         return render_template('error.html', error="Failed to load story"), 500
+
+@stories_bp.route('/user-stories')
+@login_required
+def user_stories():
+    """View current user's stories"""
+    try:
+        user_id = session['user_id']
+        user_stories = Story.query.filter_by(user_id=user_id).order_by(Story.created_at.desc()).all()
+        return render_template('stories_list_youtube.html', 
+                             stories=user_stories, 
+                             title="My Stories",
+                             current_user=get_current_user())
+    except Exception as e:
+        logger.error(f"Error loading user stories: {e}")
+        return render_template('error.html', error="Failed to load user stories"), 500
+
+@stories_bp.route('/uploaded-stories')
+@login_required
+def uploaded_stories():
+    """View current user's uploaded stories"""
+    try:
+        user_id = session['user_id']
+        uploaded_stories = Story.query.filter_by(user_id=user_id, source='upload').order_by(Story.created_at.desc()).all()
+        return render_template('stories_list_youtube.html', 
+                             stories=uploaded_stories, 
+                             title="Uploaded Stories",
+                             current_user=get_current_user())
+    except Exception as e:
+        logger.error(f"Error loading uploaded stories: {e}")
+        return render_template('error.html', error="Failed to load uploaded stories"), 500
+
+@stories_bp.route('/category/<category>')
+def category(category):
+    """View stories by category"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        stories = Story.query.filter_by(category=category, status='published')\
+            .order_by(Story.created_at.desc())\
+            .paginate(page=page, per_page=12, error_out=False)
+        
+        # Get trending topics for sidebar
+        trending_topics = Trend.query.order_by(Trend.trend_score.desc()).limit(10).all()
+        
+        return render_template('stories_list_youtube.html', 
+                             stories=stories.items,
+                             pagination=stories,
+                             title=f"{category.title()} Stories",
+                             current_category=category,
+                             current_user=get_current_user(),
+                             trending_topics=trending_topics)
+    except Exception as e:
+        logger.error(f"Error loading category {category}: {e}")
+        return render_template('error.html', error="Failed to load category"), 500
+
+@stories_bp.route('/search')
+def search():
+    """Search stories"""
+    try:
+        query = request.args.get('q', '')
+        page = request.args.get('page', 1, type=int)
+        
+        if not query:
+            return render_template('stories_list_youtube.html', 
+                                 stories=[],
+                                 title="Search Results",
+                                 search_query=query,
+                                 current_user=get_current_user())
+        
+        # Search in title, content, and tags
+        stories = Story.query.filter(
+            Story.status == 'published',
+            db.or_(
+                Story.title.contains(query),
+                Story.content.contains(query),
+                Story.tags.contains(query)
+            )
+        ).order_by(Story.created_at.desc())\
+         .paginate(page=page, per_page=12, error_out=False)
+        
+        return render_template('stories_list_youtube.html', 
+                             stories=stories.items,
+                             pagination=stories,
+                             title=f"Search: {query}",
+                             search_query=query,
+                             current_user=get_current_user())
+    except Exception as e:
+        logger.error(f"Error searching stories: {e}")
+        return render_template('error.html', error="Search failed"), 500
 
 @api_bp.route('/health')
 def health_check():
@@ -530,7 +709,7 @@ def login():
         
         if not username or not password:
             flash('Username and password are required', 'danger')
-            return render_template('login.html')
+            return render_template('login_youtube.html')
         
         # Find user by username
         user = User.query.filter_by(username=username).first()
@@ -538,12 +717,14 @@ def login():
         if user and user.check_password(password):
             if not user.is_active:
                 flash('Your account has been deactivated', 'danger')
-                return render_template('login.html')
+                return render_template('login_youtube.html')
             
             # Set session
             session['user_id'] = user.id
             session['username'] = user.username
             session['is_admin'] = user.is_admin
+            session['avatar_url'] = user.avatar_url
+            session.modified = True  # Ensure session is saved
             
             # Update last login
             user.last_login = datetime.utcnow()
@@ -562,11 +743,61 @@ def login():
         else:
             flash('Invalid username or password', 'danger')
     
-    return render_template('login.html')
+    # Get trending topics for the template
+    trending_topics = Trend.query.filter(
+        Trend.status == 'active',
+        Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+    ).order_by(Trend.trend_score.desc()).limit(5).all()
+    
+    # Create a simple form object for template compatibility
+    class LoginForm:
+        def hidden_tag(self):
+            return '<input type="hidden" name="csrf_token" value="dummy">'
+        
+        def username(self, **kwargs):
+            return f'<input type="text" name="username" {" ".join([f"{k}=\"{v}\"" for k, v in kwargs.items()])} required>'
+        
+        def password(self, **kwargs):
+            return f'<input type="password" name="password" {" ".join([f"{k}=\"{v}\"" for k, v in kwargs.items()])} required>'
+        
+        def remember_me(self, **kwargs):
+            return f'<input type="checkbox" name="remember" {" ".join([f"{k}=\"{v}\"" for k, v in kwargs.items()])}>'
+    
+    form = LoginForm()
+    return render_template('login_youtube.html', form=form, trending_topics=trending_topics)
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     """User registration"""
+    
+    # Get trending topics for the template
+    trending_topics = Trend.query.filter(
+        Trend.status == 'active',
+        Trend.discovered_at >= datetime.utcnow() - timedelta(days=7)
+    ).order_by(Trend.trend_score.desc()).limit(5).all()
+    
+    # Create a simple form object for template compatibility
+    class RegisterForm:
+        def hidden_tag(self):
+            return '<input type="hidden" name="csrf_token" value="dummy">'
+        
+        def username(self, **kwargs):
+            return f'<input type="text" name="username" {" ".join([f'{k}="{v}"' for k, v in kwargs.items()])} required>'
+        
+        def email(self, **kwargs):
+            return f'<input type="email" name="email" {" ".join([f'{k}="{v}"' for k, v in kwargs.items()])} required>'
+        
+        def password(self, **kwargs):
+            return f'<input type="password" name="password" {" ".join([f'{k}="{v}"' for k, v in kwargs.items()])} required>'
+        
+        def confirm_password(self, **kwargs):
+            return f'<input type="password" name="confirm_password" {" ".join([f'{k}="{v}"' for k, v in kwargs.items()])} required>'
+        
+        def agree_terms(self, **kwargs):
+            return f'<input type="checkbox" name="terms" {" ".join([f'{k}="{v}"' for k, v in kwargs.items()])} required>'
+    
+    form = RegisterForm()
+    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -577,42 +808,42 @@ def signup():
         # Validation
         if not username or not email or not password:
             flash('All fields are required', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         if password != confirm_password:
             flash('Passwords do not match', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         if not terms:
             flash('You must agree to the terms and conditions', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         # Check if username already exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         # Check if email already exists
         if User.query.filter_by(email=email).first():
             flash('Email already registered', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         # Validate password strength
         if len(password) < 8:
             flash('Password must be at least 8 characters long', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         if not re.search(r'[A-Z]', password):
             flash('Password must contain at least one uppercase letter', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         if not re.search(r'[a-z]', password):
             flash('Password must contain at least one lowercase letter', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         if not re.search(r'[0-9]', password):
             flash('Password must contain at least one number', 'danger')
-            return render_template('signup.html')
+            return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
         
         # Create new user
         user = User(
@@ -628,7 +859,7 @@ def signup():
         flash('Account created successfully! Please login.', 'success')
         return redirect(url_for('auth.login'))
     
-    return render_template('signup.html')
+    return render_template('register_youtube.html', form=form, trending_topics=trending_topics)
 
 @auth_bp.route('/logout')
 def logout():
@@ -637,22 +868,45 @@ def logout():
     flash('You have been logged out successfully', 'success')
     return redirect(url_for('main.index'))
 
+@auth_bp.route('/debug/session')
+def debug_session():
+    """Debug session information"""
+    from flask import current_app
+    return {
+        'session_data': dict(session),
+        'user_id_in_session': 'user_id' in session,
+        'session_cookie_name': current_app.config.get('SESSION_COOKIE_NAME'),
+        'session_modified': session.modified
+    }
+
 @auth_bp.route('/profile')
 def profile():
     """User profile page"""
-    if 'user_id' not in session:
-        flash('Please login to access your profile', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    user = User.query.get(session['user_id'])
-    if not user:
-        flash('User not found', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    # Get user's stories
-    user_stories = Story.query.filter_by(user_id=user.id).order_by(Story.created_at.desc()).all()
-    
-    return render_template('profile.html', user=user, stories=user_stories)
+    try:
+        if 'user_id' not in session:
+            flash('Please login to access your profile', 'danger')
+            return redirect(url_for('auth.login'))
+        
+        user = User.query.get(session['user_id'])
+        if not user:
+            flash('User not found', 'danger')
+            return redirect(url_for('auth.login'))
+        
+        # Get user's stories
+        user_stories = Story.query.filter_by(user_id=user.id).order_by(Story.created_at.desc()).all()
+        
+        # Calculate total views for the user
+        total_views = sum(story.views for story in user_stories)
+        
+        # Get trending topics for sidebar
+        trending_topics = Trend.query.order_by(Trend.volume.desc()).limit(10).all()
+        
+        return render_template('profile_youtube.html', user=user, stories=user_stories, trending_topics=trending_topics, total_views=total_views)
+    except Exception as e:
+        import traceback
+        current_app.logger.error(f'Profile error: {str(e)}')
+        current_app.logger.error(traceback.format_exc())
+        return f'Profile error: {str(e)}', 500
 
 @auth_bp.route('/profile/edit', methods=['GET', 'POST'])
 def edit_profile():
@@ -679,7 +933,7 @@ def edit_profile():
         flash('Profile updated successfully', 'success')
         return redirect(url_for('auth.profile'))
     
-    return render_template('edit_profile.html', user=user)
+    return render_template('edit_profile_youtube.html', user=user)
 
 @auth_bp.route('/change-password', methods=['GET', 'POST'])
 def change_password():
@@ -700,19 +954,19 @@ def change_password():
         
         if not current_password or not new_password or not confirm_password:
             flash('All fields are required', 'danger')
-            return render_template('change_password.html')
+            return render_template('change_password_youtube.html')
         
         if not user.check_password(current_password):
             flash('Current password is incorrect', 'danger')
-            return render_template('change_password.html')
+            return render_template('change_password_youtube.html')
         
         if new_password != confirm_password:
             flash('New passwords do not match', 'danger')
-            return render_template('change_password.html')
+            return render_template('change_password_youtube.html')
         
         if len(new_password) < 8:
             flash('New password must be at least 8 characters long', 'danger')
-            return render_template('change_password.html')
+            return render_template('change_password_youtube.html')
         
         user.set_password(new_password)
         db.session.commit()
@@ -720,7 +974,32 @@ def change_password():
         flash('Password changed successfully', 'success')
         return redirect(url_for('auth.profile'))
     
-    return render_template('change_password.html')
+    return render_template('change_password_youtube.html')
+
+@auth_bp.route('/preferences', methods=['GET', 'POST'])
+@login_required
+def preferences():
+    """User preferences page"""
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('User not found', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    if request.method == 'POST':
+        # Update user preferences
+        theme_preference = request.form.get('theme_preference', 'light')
+        email_notifications = request.form.get('email_notifications', 'false') == 'true'
+        newsletter_subscription = request.form.get('newsletter_subscription', 'false') == 'true'
+        
+        user.theme_preference = theme_preference
+        user.email_notifications = email_notifications
+        user.newsletter_subscription = newsletter_subscription
+        
+        db.session.commit()
+        flash('Preferences updated successfully', 'success')
+        return redirect(url_for('auth.preferences'))
+    
+    return render_template('preferences_youtube.html', user=user)
 
 # Helper functions
 def login_required(f):

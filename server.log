@@ -1,61 +1,15 @@
-2025-09-07 17:30:05,235 - app - INFO - Database tables created successfully
-2025-09-07 17:30:05,236 - app.routes - INFO - AI Brain instance created
-2025-09-07 17:30:05,236 - app - INFO - AI Brain initialized successfully
-2025-09-07 17:30:05,236 - __main__ - INFO - Starting ChronoStories on port 40268
+2025-09-08 11:13:00,376 - app - INFO - Database tables created successfully
+2025-09-08 11:13:00,377 - app.routes - INFO - AI Brain instance created
+2025-09-08 11:13:00,377 - app - INFO - AI Brain initialized successfully
+2025-09-08 11:13:00,377 - __main__ - INFO - Starting ChronoStories on port 46548
  * Serving Flask app 'app'
  * Debug mode: off
-2025-09-07 17:30:05,239 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+2025-09-08 11:13:00,380 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:40268
- * Running on http://172.17.0.3:40268
-2025-09-07 17:30:05,239 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
-2025-09-07 17:30:06,335 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:06] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:11,659 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:11] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:11,858 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:11] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:13,465 - werkzeug - INFO - 127.0.0.1 - - [07/Sep/2025 17:30:13] "GET /api/stories HTTP/1.1" 200 -
-2025-09-07 17:30:16,986 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:16] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:17,598 - app.routes - INFO - Checking status for task: task_20250907_130724_289
-2025-09-07 17:30:17,598 - app.routes - INFO - AI Brain status result: None
-2025-09-07 17:30:17,598 - app.routes - INFO - Task not found in AI Brain, checking database...
-2025-09-07 17:30:17,599 - app.routes - INFO - Database status result: {'id': 'task_20250907_130724_289', 'source': 'gnews', 'content_data': {'title': 'Test Flask', 'content': 'Test content from Flask'}, 'status': 'pending', 'created_at': '2025-09-07 13:07:24.634393', 'priority': 5, 'retry_count': 0, 'story_type': 'in_depth_analysis', 'target_audience': 'general', 'narrative_angle': 'human_impact', 'metadata': {'source': 'gnews'}, 'completed_at': None, 'result_data': {}, 'error_message': None}
-2025-09-07 17:30:17,599 - werkzeug - INFO - 127.0.0.1 - - [07/Sep/2025 17:30:17] "GET /api/story-status/task_20250907_130724_289 HTTP/1.1" 200 -
-2025-09-07 17:30:20,780 - app.routes - INFO - Checking status for task: nonexistent_task
-2025-09-07 17:30:20,780 - app.routes - INFO - AI Brain status result: None
-2025-09-07 17:30:20,780 - app.routes - INFO - Task not found in AI Brain, checking database...
-2025-09-07 17:30:20,780 - app.routes - INFO - Database status result: None
-2025-09-07 17:30:20,781 - werkzeug - INFO - 127.0.0.1 - - [07/Sep/2025 17:30:20] "[33mGET /api/story-status/nonexistent_task HTTP/1.1[0m" 404 -
-2025-09-07 17:30:22,294 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:22] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:22,726 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:22] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:27,612 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:27] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:27,777 - werkzeug - INFO - 127.0.0.1 - - [07/Sep/2025 17:30:27] "GET /api/stories?page=1&per_page=10&category=technology HTTP/1.1" 200 -
-2025-09-07 17:30:30,431 - werkzeug - INFO - 127.0.0.1 - - [07/Sep/2025 17:30:30] "GET / HTTP/1.1" 200 -
-2025-09-07 17:30:31,202 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:31] "GET / HTTP/1.1" 200 -
-2025-09-07 17:30:31,451 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:31] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
-2025-09-07 17:30:31,763 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:31] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
-2025-09-07 17:30:32,079 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:32] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:32,098 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:32] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:37,403 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:37] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:37,753 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:37] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:43,759 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:43] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:47,171 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:47] "GET / HTTP/1.1" 200 -
-2025-09-07 17:30:47,508 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:47] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:49,793 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:49] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:54,796 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:54] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:30:55,762 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:30:55] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:01,762 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:01] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:04,643 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:04] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:07,785 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:07] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:12,836 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:12] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:13,784 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:13] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:19,793 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:19] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:21,861 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:21] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:25,767 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:25] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:31,754 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:31] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:31,831 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:31] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:37,785 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:37] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:41,520 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:41] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:43,281 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:43] "GET / HTTP/1.1" 200 -
-2025-09-07 17:31:43,778 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:43] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:49,902 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:49] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:31:56,274 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:31:56] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
-2025-09-07 17:32:02,324 - werkzeug - INFO - 172.17.0.1 - - [07/Sep/2025 17:32:02] "[33mGET /ws/notifications HTTP/1.1[0m" 404 -
+ * Running on http://127.0.0.1:46548
+ * Running on http://172.17.0.3:46548
+2025-09-08 11:13:00,380 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+/openhands/micromamba/envs/openhands/lib/python3.12/site-packages/flask/app.py:1883: UserWarning: Current server name 'localhost:46548' doesn't match configured server name 'localhost:40268'
+  return self.url_map.bind_to_environ(
+2025-09-08 11:13:11,890 - werkzeug - INFO - 127.0.0.1 - - [08/Sep/2025 11:13:11] "[33mGET /auth/login HTTP/1.1[0m" 404 -
+2025-09-08 11:13:16,835 - werkzeug - INFO - 127.0.0.1 - - [08/Sep/2025 11:13:16] "[33mGET / HTTP/1.1[0m" 404 -

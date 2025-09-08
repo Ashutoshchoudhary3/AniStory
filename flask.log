@@ -1,0 +1,15 @@
+INFO:app:Database tables created successfully
+INFO:app.routes:AI Brain instance created
+INFO:app:AI Brain initialized successfully
+ * Debug mode: off
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:46548
+ * Running on http://172.17.0.3:46548
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+/openhands/micromamba/envs/openhands/lib/python3.12/site-packages/flask/app.py:1883: UserWarning: Current server name 'localhost:46548' doesn't match configured server name 'localhost:40268'
+  return self.url_map.bind_to_environ(
+INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 09:53:16] "[33mGET /auth/login HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 09:53:23] "[33mHEAD / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 09:54:35] "[33mGET /auth/login HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 09:54:44] "[33mGET /auth/login HTTP/1.1[0m" 404 -

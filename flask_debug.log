@@ -1,0 +1,16 @@
+INFO:app:Database tables created successfully
+INFO:app.routes:AI Brain instance created
+INFO:app:AI Brain initialized successfully
+ * Serving Flask app 'app.py'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:46548
+ * Running on http://172.17.0.3:46548
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+INFO:app:Database tables created successfully
+INFO:app.routes:AI Brain instance created
+INFO:app:AI Brain initialized successfully
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 106-286-371
